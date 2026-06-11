@@ -72,7 +72,41 @@
   </div>
 </section>
 
-<!-- Sections added in Tasks 5-7 go here -->
+<section class="home-section">
+  <div class="container-wide">
+    <div class="card">
+      <h3>What is SANA?</h3>
+      <p>
+        SANA (Search Agent Navigation Ablation framework) diagnoses why LLM agents fail at
+        <strong>Exploratory QA</strong> over data lakes. It converts solved tasks into
+        <em>runtime profiles</em> — a gold source sequence, sanitized subquestions, and
+        execution records — and uses them to build <em>idealized</em> Planning, Search, and
+        Data-Analysis tools. Ablating one component at a time isolates its contribution; the
+        gap that remains when everything is idealized is attributable to the agent's
+        <strong>action policy</strong>. See the <a href="method.html">Method</a> page for details.
+      </p>
+    </div>
+
+    <h3 style="margin-top:28px;">Ablation results</h3>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 6px;">
+      Vary one axis while holding the others idealized. Click any numeric column to sort.
+      Preloaded has no retrieval step, so D_ret is "—".
+    </p>
+    <div class="explorer-controls">
+      <div class="tabs" id="lb-tabs">
+        <button class="tab active" data-bench="lakeqa">LakeQA (135)</button>
+        <button class="tab" data-bench="kramabench">KramaBench (83)</button>
+      </div>
+      <div class="toggle" id="lb-model">
+        <button class="active" data-model="gpt-5.4-nano">gpt-5.4-nano</button>
+        <button data-model="gpt-5-mini">gpt-5-mini</button>
+      </div>
+    </div>
+    <div class="table-wrap" id="lb-table"></div>
+  </div>
+</section>
+
+<!-- Sections added in Task 7 go here -->
 
 <footer class="site-footer">
   <div class="container-wide">
