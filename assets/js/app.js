@@ -39,6 +39,7 @@ async function initExplorer() {
       renderMatrix();
     }));
   renderMatrix();
+  initDiagramLink();
 }
 
 function setActive(sel, el) {
@@ -97,3 +98,28 @@ function renderMatrix() {
 }
 
 initExplorer();
+
+function initDiagramLink() {
+  const fw = document.getElementById("framework");
+  const table = document.getElementById("lb-table");
+  if (!fw || !table) return;
+
+  fw.querySelectorAll(".fw-mode").forEach((modeEl) => {
+    const axis = modeEl.dataset.axis;   // plan | search | data_an
+    const mode = modeEl.dataset.mode;
+    const on = () => {
+      modeEl.classList.add("is-hot");
+      table.querySelectorAll("tbody tr").forEach((tr) => {
+        if (tr.dataset[axis] === mode) tr.classList.add("is-hot");
+      });
+    };
+    const off = () => {
+      modeEl.classList.remove("is-hot");
+      table.querySelectorAll("tbody tr.is-hot").forEach((tr) => tr.classList.remove("is-hot"));
+    };
+    modeEl.addEventListener("mouseenter", on);
+    modeEl.addEventListener("mouseleave", off);
+    modeEl.addEventListener("focus", on);
+    modeEl.addEventListener("blur", off);
+  });
+}
