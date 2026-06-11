@@ -106,7 +106,46 @@
   </div>
 </section>
 
-<!-- Sections added in Task 7 go here -->
+<section class="home-section">
+  <div class="container-wide">
+    <h3>What we found</h3>
+    <div class="findings">
+      <div class="finding">
+        <h4>Data analysis is the consistent bottleneck</h4>
+        <p>Idealizing execution gives large gains on both benchmarks (up to +24.1%), even when sources are already found.</p>
+      </div>
+      <div class="finding">
+        <h4>Search dominates on the large lake</h4>
+        <p>On LakeQA's ~40M-file lake, ideal search beats BM25 by +13–14%; on the small KramaBench it matters far less.</p>
+      </div>
+      <div class="finding">
+        <h4>Plans are written, not followed</h4>
+        <p>Agents produce near-gold decompositions (~78–82% match) yet only follow them ~28–57% of the time.</p>
+      </div>
+    </div>
+
+    <div class="inline-links" style="margin-top:24px;">
+      <a href="#" id="paper-link">Paper (PDF) ↗</a>
+      <a href="https://github.com/Austin-Senna/exploratory-qa-eval">Code (GitHub) ↗</a>
+      <a href="#" id="data-link">Dataset ↗</a>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:6px;">
+      <!-- TODO before launch: set #paper-link and #data-link hrefs; remove this note. -->
+      Paper and dataset links are placeholders pending the public release.
+    </p>
+
+    <h3 style="margin-top:28px;">Citation</h3>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      To appear at the VLDB 2026 Workshop on Systems for Data-centric Agents with Human-in-the-loop (DASHSys).
+    </p>
+    <pre class="bibtex">@inproceedings{sana2026,
+  title     = {SANA: What Matters for QA Agents over Massive Data Lakes?},
+  author    = {Wijaya, Austin Senna and Liu, Jiaxiang and Wang, Haonan and Wu, Eugene},
+  booktitle = {VLDB 2026 Workshop on Systems for Data-centric Agents with Human-in-the-loop (DASHSys)},
+  year      = {2026}
+}</pre>
+  </div>
+</section>
 
 <footer class="site-footer">
   <div class="container-wide">
