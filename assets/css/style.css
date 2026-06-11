@@ -708,11 +708,18 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 .finding p { margin: 0; font-size: 14px; color: var(--muted); }
 
 /* --- Delta bar charts (Method) --- */
-.delta-group { margin: 14px 0 22px; }
-.delta-row { display: grid; grid-template-columns: 120px 1fr 86px; align-items: center; gap: 10px; margin: 5px 0; font-size: 13px; }
-.delta-bar { height: 16px; background: var(--accent); border-radius: 4px; min-width: 2px; }
-.delta-bar.zero { background: #c9c9d2; }
-.delta-val { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Paper-style grouped delta bars: length ∝ SM, color = delta sign. */
+.delta-group { margin: 12px 0 20px; }
+.delta-row { display: grid; grid-template-columns: 118px 1fr; align-items: center; gap: 12px; margin: 6px 0; font-size: 13px; }
+.delta-mode { color: var(--text); text-align: right; }
+.delta-track { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.delta-bar { height: 18px; border-radius: 3px; min-width: 3px; flex: none; }
+.delta-bar.base { background: #cdced6; }                 /* baseline (+0.0) */
+.delta-bar.up   { background: #8fc7a0; }                 /* improvement */
+.delta-bar.down { background: #e2a6ab; }                 /* regression */
+.delta-val { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.delta-val .d-pos { color: #2f8a55; font-weight: 600; }
+.delta-val .d-neg { color: #c0464f; font-weight: 600; }
 
 /* --- Header logo --- */
 .site-header .brand-row { display: flex; align-items: center; gap: 14px; }
@@ -762,4 +769,36 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 @keyframes egg-pop { from { opacity: 0; transform: scale(.9) translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .egg-overlay, .egg-card { animation: none; }
+}
+
+/* --- Hero: benchmark stat strip + lab logos (LakeQA-style) --- */
+.hero-stats { margin: 4px auto 30px; max-width: 660px; }
+.hero-stats-label {
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px;
+}
+.stat-strip {
+  display: flex; justify-content: center;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.stat {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 16px 34px; text-decoration: none; text-align: center;
+  transition: background .18s ease;
+}
+.stat + .stat { border-left: 1px solid var(--border); }
+.stat:hover { background: rgba(94, 75, 139, 0.05); }
+.stat-value {
+  font-family: var(--display); font-size: 24px; font-weight: 600;
+  color: var(--primary); letter-spacing: -0.01em;
+}
+.stat-value .ext { font-size: 15px; color: var(--accent); vertical-align: middle; }
+.stat-label { font-size: 12px; color: var(--muted); }
+
+.hero-logos { display: flex; justify-content: center; align-items: center; gap: 28px; }
+.lab-logo-lg { height: 46px; width: auto; }
+
+@media (max-width: 560px) {
+  .stat-strip { flex-direction: column; }
+  .stat + .stat { border-left: 0; border-top: 1px solid var(--border); }
 }

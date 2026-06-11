@@ -25,17 +25,22 @@ function renderDeltas(data) {
     }));
 
   const groups = deltaState.data[deltaState.bench][deltaState.model];
-  const maxAbs = Math.max(...Object.values(groups).flat().map((d) => Math.abs(d.delta)), 1);
+  // Bar length is proportional to absolute SM (like the paper); color encodes the delta sign.
+  const maxSM = Math.max(...Object.values(groups).flat().map((d) => d.sm), 1);
   let html = "";
   for (const [name, items] of Object.entries(groups)) {
     html += `<div class="delta-group"><div class="label">${name}</div>`;
     for (const it of items) {
-      const w = (Math.abs(it.delta) / maxAbs) * 100;
-      const z = it.delta === 0 ? " zero" : "";
-      const sign = it.delta > 0 ? "+" : "";
-      html += `<div class="delta-row"><span>${it.label}</span>` +
-        `<span><span class="delta-bar${z}" style="width:${w}%"></span></span>` +
-        `<span class="delta-val">${it.sm.toFixed(1)} (${sign}${it.delta.toFixed(1)})</span></div>`;
+      const w = (it.sm / maxSM) * 100;
+      const cls = it.delta > 0 ? "up" : it.delta < 0 ? "down" : "base";
+      const dcls = it.delta > 0 ? "d-pos" : it.delta < 0 ? "d-neg" : "";
+      const sign = it.delta >= 0 ? "+" : "";         // negatives already carry "-"
+      const deltaTxt = `<span class="${dcls}">${sign}${it.delta.toFixed(1)}%</span>`;
+      html += `<div class="delta-row"><span class="delta-mode">${it.label}</span>` +
+        `<div class="delta-track">` +
+        `<span class="delta-bar ${cls}" style="width:${w}%"></span>` +
+        `<span class="delta-val">${it.sm.toFixed(1)}% (${deltaTxt})</span>` +
+        `</div></div>`;
     }
     html += "</div>";
   }
