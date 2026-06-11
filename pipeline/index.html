@@ -6,19 +6,35 @@
   <title>Pipeline — SANA</title>
   <meta name="description" content="The SANA pipeline: profile a benchmark into idealized tools, run an ablation evaluation across planning / search / data-analysis axes, and analyze where the agent fails." />
   <link rel="icon" href="data:," />
+
+  <!-- SEO — update the base URL below if a custom domain is used -->
+  <link rel="canonical" href="https://sana-ablation.github.io/sana-ablation/pipeline/" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#241636" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SANA" />
+  <meta property="og:title" content="Pipeline — SANA" />
+  <meta property="og:description" content="The SANA pipeline: profile a benchmark into idealized tools, run an ablation evaluation across planning / search / data-analysis axes, and analyze where the agent fails." />
+  <meta property="og:url" content="https://sana-ablation.github.io/sana-ablation/pipeline/" />
+  <meta property="og:image" content="https://sana-ablation.github.io/sana-ablation/assets/sakuras.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Pipeline — SANA" />
+  <meta name="twitter:description" content="The SANA pipeline: profile, evaluate, analyze — an ablation across planning, search, and data-analysis axes." />
+  <meta name="twitter:image" content="https://sana-ablation.github.io/sana-ablation/assets/sakuras.jpg" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" />
-  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 <body>
 
 <header class="site-header site-header--hero">
   <div class="container-wide">
-    <a class="brand" href="index.html">SANA</a>
+    <a class="brand" href="../">SANA</a>
     <nav class="site-nav">
-      <a href="index.html">Home</a>
-      <a href="pipeline.html" class="active">Pipeline</a>
+      <a href="../">Home</a>
+      <a href="./" class="active">Pipeline</a>
     </nav>
   </div>
 </header>
@@ -148,7 +164,7 @@ python -m sana.evaluation --search my_hybrid_retriever ...</pre>
   </div>
   <p>From the scored runs, analysis produces:</p>
   <ul>
-    <li><strong>Per-component deltas</strong> — the SM gain from idealizing each axis (charted on the <a href="index.html">home page</a>).</li>
+    <li><strong>Per-component deltas</strong> — the SM gain from idealizing each axis (charted on the <a href="../">home page</a>).</li>
     <li><strong>End-to-end comparison</strong> — Naive vs. Standard vs. all-Ideal runs.</li>
     <li><strong>Failure taxonomy</strong> — where incorrect runs break (source targeting, computation, finalization, …).</li>
     <li><strong>Plan-trajectory audit</strong> — whether the agent actually follows the plan it wrote.</li>
@@ -179,11 +195,11 @@ python -m sana.analysis --runs runs/ --out report/</pre>
 
 <footer class="site-footer">
   <div class="container-wide">
-    SANA · VLDB 2026 DASHSys · DAP Lab · <a href="index.html">Home</a>
+    SANA · VLDB 2026 DASHSys · DAP Lab · <a href="../">Home</a>
   </div>
 </footer>
 
-<script type="module" src="assets/js/app.js"></script>
+<script type="module" src="../assets/js/app.js"></script>
 
 </body>
 </html>
