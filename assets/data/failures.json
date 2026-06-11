@@ -1,0 +1,25 @@
+{
+  "taxonomy": {
+    "note": "Event share within each model. nano: 1018 events / 586 failed runs; mini: 515 / 297.",
+    "rows": [
+      {"group":"Task/planning","mini":7.4,"nano":11.3,"meaning":"Reasoning-chain divergence; question-constraint misread"},
+      {"group":"Wrong source target","mini":0.0,"nano":7.6,"meaning":"Chose wrong dataset / table / source family / version"},
+      {"group":"Execution/computation","mini":39.6,"nano":26.2,"meaning":"Wrong scope/filter; aggregation error; extraction/parsing error"},
+      {"group":"Incomplete evidence","mini":12.2,"nano":12.3,"meaning":"Ran out of budget; submitted early with incomplete evidence"},
+      {"group":"Turn-waste","mini":2.1,"nano":8.8,"meaning":"Query/repair loop; schema-inspection loop; low-yield search loop"},
+      {"group":"Finalization","mini":21.0,"nano":13.2,"meaning":"Correct evidence present but submitted answer wrong"},
+      {"group":"Tool blocker","mini":17.7,"nano":20.6,"meaning":"Files/tools/repair/unsupported formats/runtime limits blocked progress"}
+    ]
+  },
+  "trajectory": {
+    "note": "LakeQA plan-trajectory audit: share of runs Followed and Followed+Mostly.",
+    "rows": [
+      {"model":"gpt-5-mini","plan":"Naive","followed":21.2,"mostly":49.6},
+      {"model":"gpt-5-mini","plan":"Standard","followed":12.6,"mostly":46.4},
+      {"model":"gpt-5-mini","plan":"Ideal","followed":25.9,"mostly":56.5},
+      {"model":"gpt-5.4-nano","plan":"Naive","followed":5.7,"mostly":19.0},
+      {"model":"gpt-5.4-nano","plan":"Standard","followed":8.4,"mostly":24.0},
+      {"model":"gpt-5.4-nano","plan":"Ideal","followed":7.9,"mostly":28.1}
+    ]
+  }
+}

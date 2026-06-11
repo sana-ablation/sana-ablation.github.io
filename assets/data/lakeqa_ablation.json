@@ -1,0 +1,24 @@
+{
+  "benchmark": "LakeQA",
+  "tasks_per_cell": 135,
+  "models": {
+    "gpt-5.4-nano": [
+      {"plan":"Naive","search":"Ideal","data_an":"Ideal","sm":34.1,"dacc":46.5,"dret":56.5,"ret_call":3.2,"acc_call":11.6},
+      {"plan":"Standard","search":"Ideal","data_an":"Ideal","sm":31.1,"dacc":47.0,"dret":57.6,"ret_call":4.1,"acc_call":13.2},
+      {"plan":"Ideal","search":"Naive","data_an":"Ideal","sm":23.0,"dacc":39.0,"dret":50.8,"ret_call":5.8,"acc_call":12.3},
+      {"plan":"Ideal","search":"Standard","data_an":"Ideal","sm":26.7,"dacc":43.4,"dret":55.4,"ret_call":4.7,"acc_call":13.2},
+      {"plan":"Ideal","search":"Ideal","data_an":"Standard","sm":28.9,"dacc":44.0,"dret":56.9,"ret_call":3.8,"acc_call":13.6},
+      {"plan":"Ideal","search":"Ideal","data_an":"Ideal","sm":37.0,"dacc":47.1,"dret":58.1,"ret_call":4.1,"acc_call":12.5},
+      {"plan":"Ideal","search":"Preloaded","data_an":"Ideal","sm":51.8,"dacc":59.2,"dret":null,"ret_call":0.0,"acc_call":17.1}
+    ],
+    "gpt-5-mini": [
+      {"plan":"Naive","search":"Ideal","data_an":"Ideal","sm":66.7,"dacc":55.1,"dret":59.0,"ret_call":5.8,"acc_call":13.1},
+      {"plan":"Standard","search":"Ideal","data_an":"Ideal","sm":66.7,"dacc":56.2,"dret":58.8,"ret_call":5.8,"acc_call":14.4},
+      {"plan":"Ideal","search":"Naive","data_an":"Ideal","sm":63.0,"dacc":50.7,"dret":56.5,"ret_call":5.9,"acc_call":15.4},
+      {"plan":"Ideal","search":"Standard","data_an":"Ideal","sm":61.5,"dacc":52.4,"dret":58.0,"ret_call":5.8,"acc_call":15.9},
+      {"plan":"Ideal","search":"Ideal","data_an":"Standard","sm":57.8,"dacc":53.8,"dret":58.7,"ret_call":5.7,"acc_call":12.9},
+      {"plan":"Ideal","search":"Ideal","data_an":"Ideal","sm":76.3,"dacc":56.5,"dret":60.2,"ret_call":5.9,"acc_call":14.1},
+      {"plan":"Ideal","search":"Preloaded","data_an":"Ideal","sm":77.0,"dacc":61.7,"dret":null,"ret_call":0.0,"acc_call":16.8}
+    ]
+  }
+}
