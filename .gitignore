@@ -1,0 +1,17 @@
+# Editor / tooling
+.vscode/
+.idea/
+.DS_Store
+
+# Playwright MCP review artifacts
+.playwright-mcp/
+
+# Brainstorm visual-companion sessions
+.superpowers/
+
+# Stray screenshot / review artifacts at repo root
+/review-*.png
+/*-screenshot.png
+/*-review.png
+/verify-*.png
+/diag-*.png

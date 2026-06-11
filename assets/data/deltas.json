@@ -1,0 +1,26 @@
+{
+  "LakeQA": {
+    "gpt-5.4-nano": {
+      "Plan":      [{"label":"No Plan","sm":34.1,"delta":0.0},{"label":"Default","sm":31.1,"delta":-3.0},{"label":"Ideal","sm":37.0,"delta":3.0}],
+      "Search":    [{"label":"BM25","sm":23.0,"delta":0.0},{"label":"Pneuma","sm":26.7,"delta":3.7},{"label":"Ideal","sm":37.0,"delta":14.1},{"label":"Preloaded","sm":51.8,"delta":28.9}],
+      "Data An.":  [{"label":"Standard","sm":28.9,"delta":0.0},{"label":"Ideal","sm":37.0,"delta":8.2}]
+    },
+    "gpt-5-mini": {
+      "Plan":      [{"label":"No Plan","sm":66.7,"delta":0.0},{"label":"Default","sm":66.7,"delta":0.0},{"label":"Ideal","sm":76.3,"delta":9.6}],
+      "Search":    [{"label":"BM25","sm":63.0,"delta":0.0},{"label":"Pneuma","sm":61.5,"delta":-1.5},{"label":"Ideal","sm":76.3,"delta":13.3},{"label":"Preloaded","sm":77.0,"delta":14.1}],
+      "Data An.":  [{"label":"Standard","sm":57.8,"delta":0.0},{"label":"Ideal","sm":76.3,"delta":18.5}]
+    }
+  },
+  "KramaBench": {
+    "gpt-5.4-nano": {
+      "Plan":      [{"label":"No Plan","sm":75.9,"delta":0.0},{"label":"Default","sm":85.5,"delta":9.6},{"label":"Ideal","sm":87.9,"delta":12.0}],
+      "Search":    [{"label":"BM25","sm":85.5,"delta":0.0},{"label":"Pneuma","sm":90.4,"delta":4.8},{"label":"Ideal","sm":87.9,"delta":2.4},{"label":"Preloaded","sm":91.6,"delta":6.0}],
+      "Data An.":  [{"label":"Standard","sm":63.9,"delta":0.0},{"label":"Ideal","sm":87.9,"delta":24.1}]
+    },
+    "gpt-5-mini": {
+      "Plan":      [{"label":"No Plan","sm":86.8,"delta":0.0},{"label":"Default","sm":89.2,"delta":2.4},{"label":"Ideal","sm":90.4,"delta":3.6}],
+      "Search":    [{"label":"BM25","sm":84.3,"delta":0.0},{"label":"Pneuma","sm":90.4,"delta":6.0},{"label":"Ideal","sm":90.4,"delta":6.0},{"label":"Preloaded","sm":92.8,"delta":8.4}],
+      "Data An.":  [{"label":"Standard","sm":75.9,"delta":0.0},{"label":"Ideal","sm":90.4,"delta":14.5}]
+    }
+  }
+}
