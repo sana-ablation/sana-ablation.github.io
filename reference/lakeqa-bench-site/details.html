@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Details — LakeQA</title>
+  <meta name="description" content="LakeQA task definition, tool interface, a worked example, evaluation metrics, and why the benchmark is hard." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container-wide">
+    <a class="brand" href="index.html">LakeQA</a>
+    <nav class="site-nav">
+      <a href="index.html">Home</a>
+      <a href="details.html" class="active">Details</a>
+      <a href="get-started.html">Get started</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-title-strip">
+  <div class="container-wide">
+    <h1>Details</h1>
+    <p>Task definition, a worked example, evaluation metrics, and why LakeQA is hard.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container-wide">
+    <h2>What is a task?</h2>
+    <p>
+      Each task in LakeQA is a tuple <code>(Q, D, D*, A)</code>, where
+      <code>Q</code> is a natural-language question,
+      <code>D = {D₁, …, D<sub>n</sub>}</code> is the data lake (each <code>D<sub>i</sub></code> is a document
+      from Wikipedia or Data.gov), <code>D* ⊆ D</code> is the gold set of relevant documents,
+      and <code>A</code> is the final answer.
+    </p>
+    <p>
+      Given <code>Q</code> and tool access to <code>D</code>, the agent must:
+      (i) explore <code>D</code> to identify a relevant subset,
+      (ii) extract supporting facts and/or compute aggregated statistics from the retrieved files, and
+      (iii) synthesize the final answer.
+      Because <code>D</code> contains roughly 40 million documents, exhaustive content-level search is
+      computationally infeasible — agents must strategically use the search tool to prune the space using
+      ontology tags before examining contents.
+    </p>
+
+    <h3>Tool interface</h3>
+    <p>The agent is provided with a fixed set of tools <code>𝒯</code> for discovery, retrieval, and local analysis:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Input</th>
+            <th>Output / Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>search(query)</code></td>
+            <td>keyword or tag string</td>
+            <td>Returns a ranked list of dataset IDs relevant to the query.</td>
+          </tr>
+          <tr>
+            <td><code>listdata(dataset-ids)</code></td>
+            <td>list of dataset IDs</td>
+            <td>Lists files available under each dataset ID directory.</td>
+          </tr>
+          <tr>
+            <td><code>download(dataset-ids)</code></td>
+            <td>list of dataset IDs</td>
+            <td>Downloads all files for each dataset ID into a per-task local sandbox.</td>
+          </tr>
+          <tr>
+            <td><code>inspect(path)</code></td>
+            <td>file path (e.g. <code>&lt;id&gt;/&lt;file&gt;</code>)</td>
+            <td>Returns the first <em>k</em> characters of the file (a lightweight preview).</td>
+          </tr>
+          <tr>
+            <td><code>query(path, q)</code></td>
+            <td>file path and query</td>
+            <td>Queries over locally downloaded data (e.g., filter, aggregate).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>Example task</h2>
+    <p>
+      A real task from LakeQA. The agent must combine three years of Missouri state expenditure tables with
+      three years of state employee-pay tables, then chain into Wikipedia to find a person.
+    </p>
+
+    <pre class="json-viewer"><code><span class="punct">{</span>
+  <span class="key">"question"</span><span class="punct">:</span> <span class="str">"Across 2021–2023, which Missouri state agency stayed in the top five for professional services spending and also had the highest average employee count? In its headquarters city, a historically Black university was founded. Who founded that university? Return the name only. Your response should be in the format [Answer]."</span><span class="punct">,</span>
+
+  <span class="key">"answer"</span><span class="punct">:</span> <span class="str">"James Milton Turner"</span><span class="punct">,</span>
+
+  <span class="key">"datasets_used"</span><span class="punct">:</span> <span class="punct">[</span>
+    <span class="str">"2021-state-expenditures"</span><span class="punct">,</span> <span class="str">"2022-state-expenditures"</span><span class="punct">,</span> <span class="str">"2023-state-expenditures"</span><span class="punct">,</span>
+    <span class="comment">// 6 more — see assets/task_7.json</span>
+  <span class="punct">],</span>
+
+  <span class="key">"nodes"</span><span class="punct">:</span> <span class="punct">{</span>
+    <span class="key">"1"</span><span class="punct">:</span> <span class="punct">{</span>
+      <span class="key">"source"</span><span class="punct">:</span> <span class="str">"datagov/2021-state-expenditures/files/rows.txt"</span><span class="punct">,</span>
+      <span class="key">"subquestion"</span><span class="punct">:</span> <span class="str">"What were the top 5 Missouri state agencies by total professional services spending in fiscal year 2021?"</span><span class="punct">,</span>
+      <span class="key">"fact"</span><span class="punct">:</span> <span class="str">"""</span>   <span class="comment"># imports compacted from 5 lines for readability</span>
+        <span class="py-kw">import</span> io, pandas <span class="py-kw">as</span> pd, boto3
+        <span class="py-kw">from</span> botocore <span class="py-kw">import</span> UNSIGNED
+        <span class="py-kw">from</span> botocore.config <span class="py-kw">import</span> Config
+
+        source = <span class="py-str">"datagov/2021-state-expenditures/files/rows.txt"</span>
+        bucket = <span class="py-str">"lakeqa-yc4103-datalake"</span>
+        obj = boto3.<span class="py-fn">client</span>(<span class="py-str">"s3"</span>, config=<span class="py-fn">Config</span>(signature_version=UNSIGNED)) \
+                   .<span class="py-fn">get_object</span>(Bucket=bucket, Key=source)
+        df = pd.<span class="py-fn">read_csv</span>(io.<span class="py-fn">BytesIO</span>(obj[<span class="py-str">"Body"</span>].<span class="py-fn">read</span>()), low_memory=<span class="py-kw">False</span>)
+
+        result = (
+            df[df[<span class="py-str">"Category Description"</span>] == <span class="py-str">"PROFESSIONAL SERVICES"</span>]
+              .<span class="py-fn">groupby</span>(<span class="py-str">"Agency Name"</span>, dropna=<span class="py-kw">False</span>)[<span class="py-str">"Payments Total"</span>]
+              .<span class="py-fn">sum</span>()
+              .<span class="py-fn">sort_values</span>(ascending=<span class="py-kw">False</span>)
+              .<span class="py-fn">reset_index</span>()
+        )
+        answer = result.<span class="py-fn">head</span>(<span class="num">5</span>)[<span class="py-str">"Agency Name"</span>].<span class="py-fn">tolist</span>()
+      <span class="str">"""</span><span class="punct">,</span>
+      <span class="key">"answer"</span><span class="punct">:</span> <span class="punct">[</span><span class="str">"SOCIAL SERVICES"</span><span class="punct">,</span> <span class="str">"CORRECTIONS"</span><span class="punct">,</span> <span class="str">"PUBLIC SAFETY"</span><span class="punct">,</span>
+                 <span class="str">"TRANSPORTATION"</span><span class="punct">,</span> <span class="str">"ELEMENTARY AND SECONDARY EDUCATION"</span><span class="punct">]</span>
+    <span class="punct">},</span>
+    <span class="comment">// 8 more nodes hidden — see assets/task_7.json</span>
+  <span class="punct">},</span>
+
+  <span class="key">"reasoning_hops"</span><span class="punct">:</span> <span class="punct">[</span>
+    <span class="punct">{</span> <span class="key">"hop_id"</span><span class="punct">:</span> <span class="num">1</span><span class="punct">,</span> <span class="key">"answer"</span><span class="punct">:</span> <span class="punct">[</span><span class="str">"CORRECTIONS"</span><span class="punct">,</span> <span class="str">"SOCIAL SERVICES"</span><span class="punct">,</span> <span class="str">"TRANSPORTATION"</span><span class="punct">]</span> <span class="punct">},</span>
+    <span class="punct">{</span> <span class="key">"hop_id"</span><span class="punct">:</span> <span class="num">2</span><span class="punct">,</span> <span class="key">"answer"</span><span class="punct">:</span> <span class="str">"CORRECTIONS"</span> <span class="punct">},</span>
+    <span class="punct">{</span> <span class="key">"hop_id"</span><span class="punct">:</span> <span class="num">3</span><span class="punct">,</span> <span class="key">"answer"</span><span class="punct">:</span> <span class="str">"Jefferson City"</span> <span class="punct">},</span>
+    <span class="punct">{</span> <span class="key">"hop_id"</span><span class="punct">:</span> <span class="num">4</span><span class="punct">,</span> <span class="key">"answer"</span><span class="punct">:</span> <span class="str">"Lincoln University"</span> <span class="punct">},</span>
+    <span class="punct">{</span> <span class="key">"hop_id"</span><span class="punct">:</span> <span class="num">5</span><span class="punct">,</span> <span class="key">"answer"</span><span class="punct">:</span> <span class="str">"James Milton Turner"</span> <span class="punct">}</span>
+  <span class="punct">]</span>
+<span class="punct">}</span></code></pre>
+
+    <p class="json-caption">
+      Trimmed from <code>assets/task_7.json</code> in this repo. The full task has 9 retrieval/computation nodes
+      — hops 1 and 2 each fan out across three yearly datasets. Node 1's <code>fact</code> is shown verbatim,
+      with the import lines compacted on a single line for readability.
+    </p>
+  </div>
+</section>
+
+<section id="metrics">
+  <div class="container-wide">
+    <h2>Metrics</h2>
+    <p>
+      We report end-to-end performance using <strong>Exact Match (EM)</strong> against the ground-truth answer
+      (verified by multiple annotators), together with the wall-clock <strong>runtime</strong> and dollar
+      <strong>cost</strong> per task. To study the role of search separately from reasoning, we additionally
+      evaluate dataset-level <strong>precision</strong>, <strong>recall</strong>, and <strong>F1</strong> on
+      two dataset collections induced by the agent's traces:
+    </p>
+    <div class="metric-groups">
+      <div class="metric-group">
+        <h4>End-to-end</h4>
+        <ul>
+          <li><code>EM</code> — Exact Match against the gold answer (↑)</li>
+          <li><code>Runtime</code> — wall-clock seconds per task (↓)</li>
+          <li><code>Cost</code> — US dollars per task (↓)</li>
+        </ul>
+      </div>
+      <div class="metric-group">
+        <h4>Accessed set <code>D_acc</code></h4>
+        <ul>
+          <li><code>Precision</code> vs <code>D*</code></li>
+          <li><code>Recall</code> vs <code>D*</code></li>
+          <li><code>F1</code> vs <code>D*</code></li>
+        </ul>
+        <p style="font-size:13px; color: var(--muted); margin-top: 8px;">Datasets the agent <em>opened or queried</em> while constructing its answer.</p>
+      </div>
+      <div class="metric-group">
+        <h4>Retrieval set <code>D_ret</code></h4>
+        <ul>
+          <li><code>Precision</code> vs <code>D*</code></li>
+          <li><code>Recall</code> vs <code>D*</code></li>
+          <li><code>F1</code> vs <code>D*</code></li>
+        </ul>
+        <p style="font-size:13px; color: var(--muted); margin-top: 8px;">Union of dataset IDs the agent had access to via discovery, regardless of whether they were used.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 28px;">Why both <code>D_ret</code> and <code>D_acc</code>?</h3>
+    <p>
+      The gap between <code>D_ret</code> and <code>D_acc</code> can be interpreted as <em>reasoning failure</em>
+      — the agent surfaced the relevant document but did not actually use it. Low recall on <code>D_ret</code>
+      can be interpreted as <em>search failure</em> — the agent was not able to pinpoint what to query to find
+      the relevant documents at all.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>Why is it hard?</h2>
+    <div class="challenge-grid">
+      <div class="challenge">
+        <div class="num">Challenge 1</div>
+        <h4>Missing evidence and high search density</h4>
+        <p>The agent must identify which documents contain the required evidence inside a collection where even enumerating candidate names is prohibitively expensive — over one million candidates per task.</p>
+      </div>
+      <div class="challenge">
+        <div class="num">Challenge 2</div>
+        <h4>Abundance and heterogeneity</h4>
+        <p>The collection mixes kilobyte text files with gigabyte-scale tables, structured and unstructured formats, and separates each table from its metadata into different documents.</p>
+      </div>
+      <div class="challenge">
+        <div class="num">Challenge 3</div>
+        <h4>Exploratory planning and high reasoning density</h4>
+        <p>Tasks require an average of 7.67 documents (vs ~2–4 in prior multi-hop benchmarks). The agent must repeatedly reason about what is missing, propose targeted queries, and verify evidence before synthesizing an answer.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container-wide">
+    LakeQA · ICML 2026 · <a href="index.html">Home</a> · <a href="get-started.html">Get started</a>
+  </div>
+</footer>
+
+</body>
+</html>

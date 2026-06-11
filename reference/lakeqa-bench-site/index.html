@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LakeQA — An Exploratory QA Benchmark over a Million-Scale Data Lake</title>
+  <meta name="description" content="LakeQA: a benchmark for Exploratory Question Answering over a ~9.5 TB heterogeneous data lake spanning Wikipedia and Data.gov." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container-wide">
+    <a class="brand" href="index.html">LakeQA</a>
+    <nav class="site-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="details.html">Details</a>
+      <a href="get-started.html">Get started</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container-wide">
+    <h1>LakeQA</h1>
+    <p class="tagline">An Exploratory QA Benchmark over a Million-Scale Data Lake</p>
+    <p class="subtagline">Can LLM agents discover the evidence before reasoning over it?</p>
+  </div>
+</section>
+
+<section class="home-section">
+  <div class="container-wide">
+    <div class="home-grid">
+
+      <!-- LEFT CARD -->
+      <div class="card left-col">
+
+        <h3>What is LakeQA?</h3>
+        <p>
+          LakeQA evaluates <strong>Exploratory Question Answering (EQA)</strong>, a setting where an LLM agent
+          is given only a natural-language question and must <em>discover</em> the relevant evidence from a
+          large heterogeneous data lake before answering. Unlike reading-comprehension benchmarks where evidence
+          is provided, or open-domain QA over a small curated corpus, EQA requires the agent to repeatedly
+          alternate between (i) reasoning about what evidence is missing and (ii) searching for documents that
+          contain it.
+        </p>
+        <p>
+          LakeQA is built over a <strong>~9.5 TB</strong> deduplicated collection of Wikipedia and open-source
+          government data — about <strong>40 million unique files</strong> spanning structured (CSV, JSON) and
+          unstructured (TXT, PDF, HTML) formats. To answer a single LakeQA question, an agent typically needs
+          to locate, inspect, and reason across roughly <strong>7.67 documents</strong> drawn from a search
+          space of more than one million candidates.
+        </p>
+        <p>
+          For more details about the task, the tools, the metrics, and a worked example, see the
+          <a href="details.html">Details</a> page.
+        </p>
+        <div class="inline-links">
+          <a href="#paper-pdf-link">Paper (PDF) ↗</a>
+          <a href="#dataset-link">Dataset (S3) ↗</a>
+          <a href="#code-link">Code (GitHub) ↗</a>
+        </div>
+
+        <hr class="card-divider" />
+
+        <h3>Benchmark pipeline</h3>
+        <div class="pipeline">
+          <div class="node">Question</div>
+          <span class="arrow">→</span>
+          <div class="node">Plan missing evidence</div>
+          <span class="arrow">→</span>
+          <div class="node">Search data lake</div>
+          <span class="arrow">→</span>
+          <div class="node">Inspect / query files</div>
+          <span class="arrow">→</span>
+          <div class="node">Multi-hop answer</div>
+        </div>
+        <p style="font-size: 14px; color: var(--muted); margin-top: 12px;">
+          At each step the agent uses a fixed tool interface
+          (<code>search</code>, <code>listdata</code>, <code>download</code>, <code>inspect</code>, <code>query</code>)
+          to discover, retrieve, and analyze data.
+        </p>
+
+        <hr class="card-divider" />
+
+        <h3>Citation</h3>
+        <p style="font-size: 14px; color: var(--muted); margin: 0 0 8px;">
+          <strong>Authors:</strong> <span class="placeholder">[FILL IN FROM CAMERA-READY]</span>
+        </p>
+        <p style="font-size: 14px; color: var(--muted); margin: 0 0 14px;">
+          To appear at the International Conference on Machine Learning (ICML), 2026.
+        </p>
+        <pre class="bibtex">@inproceedings{lakeqa2026,
+  title     = {LakeQA: An Exploratory QA Benchmark over a Million-Scale Data Lake},
+  author    = {[FILL IN FROM CAMERA-READY]},
+  booktitle = {Proceedings of the International Conference on Machine Learning (ICML)},
+  year      = {2026}
+}</pre>
+
+      </div>
+
+      <!-- RIGHT CARD -->
+      <div class="card right-col">
+
+        <h3>Leaderboard</h3>
+        <p style="font-size: 13px; color: var(--muted); margin: 0 0 14px;">
+          End-to-end performance on the two LakeQA splits.
+          Click any numeric column header to sort.
+          See <a href="details.html#metrics">metric definitions</a>.
+        </p>
+
+        <div class="tabs" id="lb-tabs">
+          <button class="tab" data-split="full">LakeQA-full (1,005)</button>
+          <button class="tab" data-split="mini">LakeQA-mini (135)</button>
+        </div>
+
+        <div class="table-wrap" id="lb-table"></div>
+
+        <p class="lb-footnote">
+          <strong>Submit:</strong> open a PR adding a row to
+          <code>assets/data/leaderboard_full.json</code> or
+          <code>assets/data/leaderboard_mini.json</code>. Schema is in the
+          <a href="https://github.com/[FILL IN]/lakeqa-bench-site#submitting-an-entry">README</a>.
+        </p>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container-wide">
+    LakeQA · ICML 2026 · <a href="details.html">Details</a> · <a href="get-started.html">Get started</a>
+  </div>
+</footer>
+
+<script src="assets/js/leaderboard.js"></script>
+<script>
+  window.LakeQA.renderLeaderboard({
+    tableContainerId: "lb-table",
+    tabsContainerId:  "lb-tabs"
+  });
+</script>
+
+</body>
+</html>

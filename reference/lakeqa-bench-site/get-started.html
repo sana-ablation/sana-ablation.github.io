@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Get started — LakeQA</title>
+  <meta name="description" content="Set up the LakeQA dataset, run the example agent, and submit your results to the leaderboard." />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container-wide">
+    <a class="brand" href="index.html">LakeQA</a>
+    <nav class="site-nav">
+      <a href="index.html">Home</a>
+      <a href="details.html">Details</a>
+      <a href="get-started.html" class="active">Get started</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-title-strip">
+  <div class="container-wide">
+    <h1>Get started</h1>
+    <p>Set up the dataset, run a baseline agent, and submit your results to the leaderboard.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container-wide">
+    <h2>1. Prerequisites</h2>
+    <p>
+      LakeQA's data lake is hosted on a public S3 bucket and is accessed anonymously — no AWS account is required.
+      Local installation needs:
+    </p>
+    <ul>
+      <li>Python <strong>3.10+</strong></li>
+      <li><code>git</code></li>
+      <li>Approximately <strong>9.5 TB</strong> of free disk space for the full data lake (or skip ahead and use only the per-task download flow described below).</li>
+    </ul>
+    <p>
+      Install the Python dependencies with:
+    </p>
+    <pre class="bibtex">pip install pandas boto3 botocore</pre>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>2. Get the dataset</h2>
+    <p>
+      LakeQA is published as a single public S3 bucket containing roughly <strong>40 million</strong> deduplicated
+      files from Wikipedia and Data.gov. There is no auth — clients use the anonymous (unsigned) S3 protocol.
+    </p>
+
+    <h3>Option A — On-demand (recommended for most users)</h3>
+    <p>
+      Don't pre-download anything. The reference agent downloads only the files it inspects for each task.
+      This is how the example in <a href="details.html">Details</a> works — see node 1's <code>fact</code>:
+    </p>
+    <pre class="bibtex">import io, pandas as pd, boto3
+from botocore import UNSIGNED
+from botocore.config import Config
+
+bucket = <span class="placeholder">[FILL IN — S3 BUCKET NAME]</span>
+key = "datagov/2021-state-expenditures/files/rows.txt"
+
+s3 = boto3.client("s3", config=Config(signature_version=UNSIGNED))
+obj = s3.get_object(Bucket=bucket, Key=key)
+df = pd.read_csv(io.BytesIO(obj["Body"].read()), low_memory=False)</pre>
+
+    <h3>Option B — Bulk download</h3>
+    <p>
+      For local-only experiments or full reproducibility, mirror the bucket with the AWS CLI. Allocate ≥ 9.5 TB of
+      disk and budget several hours of bandwidth.
+    </p>
+    <pre class="bibtex">aws s3 sync --no-sign-request \
+    s3://<span class="placeholder">[FILL IN — S3 BUCKET NAME]</span>/ \
+    ./lakeqa-data/</pre>
+
+    <h3>The task files</h3>
+    <p>
+      Tasks themselves are small JSON files distributed with the code repository (next section). Each task has the
+      structure shown in <a href="details.html#metrics">Details — Example task</a>.
+    </p>
+    <div class="banner">
+      <strong>Splits:</strong>
+      <code>tasks/lakeqa_full.jsonl</code> contains all 1,005 tasks.
+      <code>tasks/lakeqa_mini.jsonl</code> is a stratified 135-task subset for fast iteration.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>3. Get the code</h2>
+    <p>
+      The reference agent, evaluation harness, and tool implementations live in a separate repository:
+    </p>
+    <pre class="bibtex">git clone <span class="placeholder">[FILL IN — GITHUB REPO URL]</span>
+cd lakeqa
+pip install -e .</pre>
+    <p>
+      The repository ships with the five tools described in <a href="details.html">Details</a>
+      (<code>search</code>, <code>listdata</code>, <code>download</code>, <code>inspect</code>, <code>query</code>),
+      a baseline agent skeleton, and an evaluator that produces the leaderboard metrics
+      (EM, runtime, cost, and the <code>D_acc</code> / <code>D_ret</code> precision/recall/F1).
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>4. Run the baseline on one task</h2>
+    <p>
+      Smoke-test your install by running the bundled baseline agent on the first task of LakeQA-mini:
+    </p>
+    <pre class="bibtex">python -m lakeqa.run \
+    --tasks tasks/lakeqa_mini.jsonl \
+    --task-id 1 \
+    --agent baseline \
+    --model claude-haiku-4-5 \
+    --out runs/smoke_test/</pre>
+    <p>
+      This downloads the task's gold datasets on demand, executes the agent loop until it submits an answer
+      (or hits the turn limit), and writes a per-task trace JSON plus a top-level <code>predictions.jsonl</code>
+      to <code>runs/smoke_test/</code>.
+    </p>
+    <p>
+      Run on the full mini split:
+    </p>
+    <pre class="bibtex">python -m lakeqa.run \
+    --tasks tasks/lakeqa_mini.jsonl \
+    --agent baseline \
+    --model claude-haiku-4-5 \
+    --out runs/mini_haiku/</pre>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>5. Add your own agent</h2>
+    <p>
+      An agent is a Python class with a single <code>step(state) -&gt; tool_call</code> method. The harness
+      handles the loop, the tool execution, and the final-answer extraction. Subclass the base agent and register it:
+    </p>
+    <pre class="bibtex">from lakeqa.agents import BaseAgent, register
+
+@register("my_agent")
+class MyAgent(BaseAgent):
+    def step(self, state):
+        # state.history    : list of prior tool calls + outputs
+        # state.tools      : the 5 LakeQA tools
+        # state.scratchpad : your own working memory
+        return state.tools.search(query="missouri department of corrections")</pre>
+    <p>
+      Then run with <code>--agent my_agent</code>. See <code>examples/</code> in the code repo for full
+      demonstrations.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>6. Evaluate</h2>
+    <p>
+      Score a run against the gold annotations:
+    </p>
+    <pre class="bibtex">python -m lakeqa.eval \
+    --predictions runs/mini_haiku/predictions.jsonl \
+    --tasks tasks/lakeqa_mini.jsonl \
+    --report runs/mini_haiku/report.json</pre>
+    <p>
+      <code>report.json</code> contains the eight numbers you need for a leaderboard submission:
+      <code>em</code>, <code>runtime_s</code>, <code>cost_usd</code>,
+      <code>dacc_p</code>/<code>dacc_r</code>/<code>dacc_f1</code>,
+      <code>dret_p</code>/<code>dret_r</code>/<code>dret_f1</code>.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>7. Submit to the leaderboard</h2>
+    <p>
+      Submissions are accepted as pull requests against this site's repo. Add a row to the relevant JSON file
+      and link your trace bundle (uploaded anywhere publicly accessible — your repo, a Hugging Face dataset,
+      an S3 bucket, etc.).
+    </p>
+    <ol>
+      <li>Fork <a href="https://github.com/[FILL IN]/lakeqa-bench-site">this site's repo</a>.</li>
+      <li>Add an object to <code>assets/data/leaderboard_full.json</code> or
+        <code>assets/data/leaderboard_mini.json</code> using the schema below.</li>
+      <li>Open a PR. Maintainers will sanity-check the trace and merge.</li>
+    </ol>
+
+    <h3>Submission schema</h3>
+    <pre class="bibtex">{
+  "rank": 1,
+  "model": "Your System Name",
+  "em": 23.08,
+  "runtime_s": 124.45,
+  "cost_usd": 0.96,
+  "dacc_p": 34.18, "dacc_r": 33.27, "dacc_f1": 40.03,
+  "dret_p": 2.61,  "dret_r": 42.12, "dret_f1": 5.86,
+  "reported": "2026-05",
+  "source": "https://link-to-your-paper-or-traces",
+  "notes": ""
+}</pre>
+    <p>
+      Field meanings live in the <a href="details.html#metrics">Details → Metrics</a> section.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="container-wide">
+    <h2>8. Cite</h2>
+    <p>
+      If LakeQA is useful in your work, please cite:
+    </p>
+    <pre class="bibtex">@inproceedings{lakeqa2026,
+  title     = {LakeQA: An Exploratory QA Benchmark over a Million-Scale Data Lake},
+  author    = {[FILL IN FROM CAMERA-READY]},
+  booktitle = {Proceedings of the International Conference on Machine Learning (ICML)},
+  year      = {2026}
+}</pre>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container-wide">
+    LakeQA · ICML 2026 · <a href="index.html">Home</a> · <a href="details.html">Details</a>
+  </div>
+</footer>
+
+</body>
+</html>
