@@ -21,7 +21,7 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+  font-family: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -32,6 +32,9 @@ a {
   text-decoration: none;
 }
 a:hover { text-decoration: underline; }
+
+/* Every heading + subheading uses the serif title font for one consistent voice */
+h1, h2, h3, h4, h5, h6 { font-family: var(--display); }
 
 .container {
   max-width: 960px;
@@ -93,10 +96,14 @@ a:hover { text-decoration: underline; }
   font-weight: 700;
 }
 .hero .tagline {
-  font-size: 22px;
-  margin: 0 0 8px;
+  font-family: var(--display);
+  font-size: clamp(19px, 2.1vw, 25px);
+  line-height: 1.4;
+  font-weight: 400;
+  max-width: 44em;          /* one line on desktop, wraps gracefully when narrow */
+  margin: 0 auto 8px;       /* auto margins truly center the block, not just its text */
   color: var(--text);
-  font-weight: 500;
+  letter-spacing: 0.004em;
 }
 .hero .subtagline {
   font-size: 17px;
@@ -620,28 +627,32 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
   .home-grid > .card { animation: none; }
 }
 
-/* Secondary-page header band — same vertical rhythm as .hero,
-   left-aligned content (vs centered on the home hero). */
+/* Secondary-page header band — same dark sakura treatment as the home hero,
+   with the nav merged on top, but left-aligned content. */
 .page-title-strip {
-  background:
-    radial-gradient(ellipse 60% 80% at 50% 0%,
-      rgba(94, 75, 139, 0.10), transparent 70%),
-    var(--light);
-  border-bottom: 1px solid var(--border);
-  padding: 72px 0 64px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--accent-deep);
+  padding: 116px 0 62px;
+  background: #241636;
 }
 .page-title-strip h1 {
   margin: 0;
   font-family: var(--display);
   font-size: 48px;
-  color: var(--primary);
+  color: #fff;
   letter-spacing: -0.018em;
   font-weight: 700;
+  text-shadow: 0 2px 26px rgba(16, 9, 30, 0.5);
 }
 .page-title-strip p {
-  margin: 8px 0 0;
-  font-size: 17px;
-  color: var(--muted);
+  margin: 10px 0 0;
+  font-family: var(--display);
+  font-size: clamp(16px, 1.3vw, 19px);
+  line-height: 1.45;
+  max-width: 60ch;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 2px 26px rgba(16, 9, 30, 0.5);
 }
 
 /* ---------- Mobile ---------- */
@@ -663,13 +674,10 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
   .metric-groups { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 
+  /* keep the brand left / nav top-right on a single row at every width */
   .site-header .container,
-  .site-header .container-wide {
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
-  }
-  .site-nav a { margin-left: 0; margin-right: 16px; }
+  .site-header .container-wide { gap: 12px; }
+  .site-nav a { margin-left: 16px; }
 
   .pipeline { flex-direction: column; }
   .pipeline .arrow { transform: rotate(90deg); }
@@ -681,7 +689,7 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
     padding: 16px 18px;
   }
 
-  .page-title-strip { padding: 44px 0 36px; }
+  .page-title-strip { padding: 92px 0 36px; }
   .page-title-strip h1 { font-size: 32px; }
   .page-title-strip p { font-size: 15px; }
 }
@@ -743,26 +751,88 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 .d-select select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .delta-group .label { font-size:13px; font-weight:600; margin-bottom:4px; }
 
-/* --- Compact framework diagram for the narrow left column --- */
-.framework-compact { grid-template-columns: 1fr; gap: 10px; margin: 6px 0 4px; }
-.framework-compact .fw-col { border-radius: 10px; padding: 10px 12px; }
-.framework-compact .fw-col > h4 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
-.framework-compact .fw-modes { flex-direction: row; flex-wrap: wrap; gap: 6px; }
-.framework-compact .fw-mode { gap: 6px; font-size: 13px; padding: 3px 9px; border: 1px solid var(--border); border-radius: 999px; cursor: default; }
-.framework-compact .fw-mode .dot { width: 7px; height: 7px; }
-.framework-compact .fw-mode.is-active { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--accent); font-weight: 600; }
-.framework-compact .fw-mode:hover { background: transparent; color: var(--muted); }
-.framework-compact .fw-mode.is-active:hover { background: var(--accent-soft); color: var(--accent-deep); }
+/* --- Runtime-stage list: the three ablatable axes as a connected pipeline --- */
+.axes {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  counter-reset: axis;
+}
+.axis {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 14px;
+  padding: 14px 0 16px;
+}
+/* connector rail threading the numbered nodes into one runtime loop */
+.axis::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 30px;
+  bottom: -2px;
+  width: 2px;
+  background: linear-gradient(var(--accent) 0%, rgba(94, 75, 139, 0.18) 100%);
+}
+.axis:last-child::before { display: none; }
+
+.axis-num {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-deep);
+  background: #fff;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 4px #fff;
+}
+.axis-body { min-width: 0; padding-top: 1px; }
+.axis-body > h4 {
+  margin: 3px 0 5px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+.axis-does {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.axis-ideal {
+  margin: 5px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.axis-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-right: 6px;
+  vertical-align: 1px;
+}
 
 /* --- Right column: stack findings as a takeaway list --- */
 .right-col .findings { grid-template-columns: 1fr; gap: 12px; margin-top: 6px; }
 
 /* --- Home left card: framework description + per-axis ideal captions + invite --- */
-.fw-desc { margin: 0 0 14px; font-size: 15px; color: var(--text); }
-.framework-compact .fw-col { padding: 12px 14px; }
-.framework-compact .fw-col > h4 { margin: 0 0 6px; }
-.framework-compact .fw-ideal { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
-.framework-compact .fw-ideal strong { color: var(--accent-deep); font-weight: 600; }
+.fw-desc { margin: 0 0 4px; font-size: 15px; line-height: 1.55; color: var(--text); }
 .fw-invite {
   margin: 14px 0 0; font-size: 13px; line-height: 1.5; color: var(--accent-deep);
   background: var(--accent-soft); border-radius: 8px; padding: 11px 14px;
@@ -773,12 +843,15 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 .link-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .link-btn {
   display: inline-flex; align-items: center; gap: 8px;
-  border: 1px solid var(--border); border-radius: 8px; padding: 9px 15px;
+  border: 1px solid var(--border); border-radius: 0; padding: 9px 15px;
   background: #fff; color: var(--primary); font-size: 14px; font-weight: 500;
   text-decoration: none; transition: background .18s ease, border-color .18s ease;
 }
 .link-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
 .link-btn svg { width: 17px; height: 17px; flex: none; }
+/* brand-tinted icons: arXiv red, GitHub dark purple */
+#paper-link svg { color: #b31b1b; }
+.link-btn[href*="github"] svg { color: var(--accent-deep); }
 
 /* --- Pipeline page: stage strip + numbered stage headings --- */
 .stage-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 18px 0 4px; }
@@ -810,16 +883,35 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 .egg-overlay {
   position: fixed; inset: 0; z-index: 1000;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(26, 26, 31, 0.55); backdrop-filter: blur(2px);
+  background: rgba(16, 9, 30, 0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
   animation: egg-fade .18s ease-out both;
 }
+/* TWICE-style photocard: deep amethyst mat, portrait proportion, square corners */
 .egg-card {
-  position: relative; background: #fff; border-radius: 14px; padding: 14px;
-  max-width: min(86vw, 420px); box-shadow: 0 24px 60px -20px rgba(26,26,31,0.5);
+  position: relative;
+  background: linear-gradient(157deg, #3f2d63 0%, #29183f 55%, #1b1030 100%);
+  border: 1px solid rgba(207, 188, 245, 0.32);
+  border-radius: 0;
+  padding: 20px 20px 0;        /* even top/side mat; bottom mat comes from the caption */
+  max-width: min(82vw, 332px);
+  box-shadow:
+    0 30px 80px -24px rgba(8, 4, 18, 0.9),
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   animation: egg-pop .22s cubic-bezier(.2,.8,.25,1.2) both;
 }
-.egg-card img { display: block; width: 100%; height: auto; border-radius: 8px; }
-.egg-cap { margin: 12px 4px 4px; text-align: center; font-size: 15px; color: var(--ink); }
+.egg-card img {
+  display: block; width: 100%; height: auto; border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.7);
+}
+.egg-cap {
+  margin: 0; padding: 26px 6px 34px;   /* generous bottom mat for a portrait card */
+  text-align: center;
+  font-family: var(--display);
+  font-size: 16px; line-height: 1.4; letter-spacing: .01em;
+  color: #f1e9ff;
+}
 .egg-close {
   position: absolute; top: 6px; right: 10px; border: 0; background: transparent;
   font-size: 26px; line-height: 1; color: #fff; cursor: pointer;
@@ -861,4 +953,82 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 @media (max-width: 560px) {
   .stat-strip { flex-direction: column; }
   .stat + .stat { border-left: 0; border-top: 1px solid var(--border); }
+}
+
+/* --- Home hero: sakura background image with the nav merged on top (HotpotQA-style) --- */
+.site-header--hero {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+  background: transparent; border-bottom: 0;
+}
+/* On the dark sakura hero, nav + brand flip to light for contrast */
+.site-header--hero .brand { color: #fff; }
+.site-header--hero .site-nav a { color: rgba(255, 255, 255, 0.82); }
+.site-header--hero .site-nav a:hover,
+.site-header--hero .site-nav a.active { color: #fff; }
+
+.hero--image {
+  position: relative;
+  overflow: hidden;
+  padding: 116px 0 62px;
+  border-bottom: 1px solid var(--accent-deep);
+  background: #241636; /* deep amethyst fallback under the image */
+}
+/* darkened, richer sakuras */
+.hero--image::before,
+.page-title-strip::before {
+  content: "";
+  position: absolute; inset: 0; z-index: 0;
+  background: url("../sakuras.jpg") center 38% / cover no-repeat;
+  filter: brightness(0.46) saturate(1.25) contrast(1.04);
+}
+/* amethyst tint + center vignette so the text reads cleanly */
+.hero--image::after,
+.page-title-strip::after {
+  content: "";
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 78% 66% at 50% 44%, rgba(40, 25, 62, 0.10), rgba(20, 12, 36, 0.58) 100%),
+    linear-gradient(180deg, rgba(34, 21, 54, 0.55) 0%, rgba(34, 21, 54, 0.12) 46%, rgba(20, 12, 36, 0.62) 100%);
+}
+.hero--image > .container-wide,
+.page-title-strip > .container-wide { position: relative; z-index: 1; }
+
+.hero--image h1 { color: #fff; }
+.hero--image .tagline { color: rgba(255, 255, 255, 0.92); }
+.hero--image .hero-stats-label { color: rgba(255, 255, 255, 0.78); }
+.hero--image h1,
+.hero--image .tagline,
+.hero--image .hero-stats-label { text-shadow: 0 2px 26px rgba(16, 9, 30, 0.5); }
+
+/* benchmark strip: translucent frosted glass, bracketed by a vertical rule
+   at the two outer ends of the row only (no full border, no inner divider) */
+.hero--image .stat-strip {
+  display: inline-flex;
+  border: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.55);
+  border-right: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0;
+  background: rgba(22, 13, 36, 0.42);
+  box-shadow: none;
+}
+/* cells are transparent so the translucent strip shows through
+   (overrides the leftover white .stat leaderboard-card rule) */
+.hero--image .stat {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  transition: background .15s ease, box-shadow .15s ease;
+}
+.hero--image .stat + .stat { border-left: 0; }
+.hero--image .stat:hover {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1.5px rgba(207, 188, 245, 0.95); /* purple outline on hover */
+}
+/* light text so it reads through the translucent panel */
+.hero--image .stat-value { color: #fff; }
+.hero--image .stat-value .ext { color: #d9c9f2; }
+.hero--image .stat-label { color: rgba(255, 255, 255, 0.72); }
+
+@media (max-width: 560px) {
+  .hero--image { padding-top: 96px; }
 }

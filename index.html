@@ -8,12 +8,12 @@
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
 
-<header class="site-header">
+<header class="site-header site-header--hero">
   <div class="container-wide">
     <a class="brand" href="index.html">SANA</a>
     <nav class="site-nav">
@@ -23,10 +23,10 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero hero--image">
   <div class="container-wide">
     <h1>SANA</h1>
-    <p class="tagline">A diagnostic ablation framework that idealizes exploratory question-answering in search, planning, data analysis.</p>
+    <p class="tagline">An ablation framework that idealizes agents in search, planning, or data analysis.</p>
 
     <div class="hero-stats">
       <div class="hero-stats-label">Current benchmark results</div>
@@ -54,28 +54,42 @@
 
       <!-- LEFT: framework + links + citation -->
       <div class="card left-col">
-        <h3 style="margin-top:0;">The SANA ablation framework</h3>
+        <h3 style="margin-top:0;">How SANA works</h3>
         <p class="fw-desc">
-          SANA diagnoses why LLM agents fail at <strong>Exploratory QA</strong> over data lakes.
-          Each runtime component is swapped between realistic and idealized implementations.
+          When an LLM agent fails at <strong>Exploratory QA</strong> over a data lake,
+          which part of its runtime is to blame? An agent answers in three stages.
+          SANA replaces one stage at a time with an <strong>oracle</strong> built from the
+          task's ground truth — the accuracy it gains pinpoints the bottleneck.
         </p>
-        <div class="framework framework-compact" id="framework">
-          <div class="fw-col">
-            <h4>Planning</h4>
-            <p class="fw-ideal"><strong>Ideal:</strong> gives the gold sanitized subquestions.</p>
-          </div>
-          <div class="fw-col">
-            <h4>Search</h4>
-            <p class="fw-ideal"><strong>Ideal:</strong> always returns what the query wants from the task's gold source sequence.</p>
-          </div>
-          <div class="fw-col">
-            <h4>Data Analysis</h4>
-            <p class="fw-ideal"><strong>Ideal:</strong> code has no implementation error and runs exactly as the agent intended when writing it.</p>
-          </div>
-        </div>
+        <ol class="axes" id="framework">
+          <li class="axis">
+            <span class="axis-num">1</span>
+            <div class="axis-body">
+              <h4>Planning</h4>
+              <p class="axis-does">Breaks the question into an ordered list of sub-questions.</p>
+              <p class="axis-ideal"><span class="axis-tag">oracle</span> hands over the correct sub-questions directly.</p>
+            </div>
+          </li>
+          <li class="axis">
+            <span class="axis-num">2</span>
+            <div class="axis-body">
+              <h4>Search</h4>
+              <p class="axis-does">Hunts a ~40M-file lake for the datasets each sub-question needs.</p>
+              <p class="axis-ideal"><span class="axis-tag">oracle</span> returns only the datasets the task actually requires.</p>
+            </div>
+          </li>
+          <li class="axis">
+            <span class="axis-num">3</span>
+            <div class="axis-body">
+              <h4>Data Analysis</h4>
+              <p class="axis-does">Writes and runs SQL/Python to compute each intermediate answer.</p>
+              <p class="axis-ideal"><span class="axis-tag">oracle</span> executes the agent's intent with zero implementation bugs.</p>
+            </div>
+          </li>
+        </ol>
         <p class="fw-invite">
-          Ablate any ideal axis with your own implementation — see the
-          <a href="pipeline.html">Pipeline</a>.
+          Swap any oracle for <strong>your own</strong> implementation and watch the delta move —
+          see the <a href="pipeline.html">Pipeline</a>.
         </p>
 
         <hr class="card-divider" />
