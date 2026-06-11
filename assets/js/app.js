@@ -47,50 +47,6 @@ function renderDeltas(data) {
   document.getElementById("delta-charts").innerHTML = html;
 }
 
-/* ---------- Method findings: end-to-end + failure tables ---------- */
-
-async function initMethodFindings() {
-  if (!document.getElementById("e2e-table")) return;
-  const [e2e, failures] = await Promise.all([
-    fetch("assets/data/endtoend.json").then((r) => r.json()),
-    fetch("assets/data/failures.json").then((r) => r.json()),
-  ]);
-  renderE2E(e2e);
-  renderFailures(failures);
-}
-
-function renderE2E(e2e) {
-  const benches = ["LakeQA", "KramaBench"];
-  const models = ["gpt-5.4-nano", "gpt-5-mini"];
-  let html = "<table><thead><tr><th>Benchmark</th><th>Model</th><th>Mode</th>" +
-    "<th>SM %</th><th>D_ret %</th><th>D_acc %</th><th>Ret</th><th>Acc</th></tr></thead><tbody>";
-  for (const b of benches) for (const m of models)
-    e2e[b][m].forEach((r, i) => {
-      html += `<tr><td>${i === 0 ? b : ""}</td><td>${i === 0 ? m : ""}</td>` +
-        `<td><span class="mode-chip${r.mode === "Ideal" ? " ideal" : ""}">${r.mode}</span></td>` +
-        `<td style="text-align:right">${r.sm.toFixed(1)}</td><td style="text-align:right">${r.dret.toFixed(1)}</td>` +
-        `<td style="text-align:right">${r.dacc.toFixed(1)}</td><td style="text-align:right">${r.ret_call.toFixed(1)}</td>` +
-        `<td style="text-align:right">${r.acc_call.toFixed(1)}</td></tr>`;
-    });
-  document.getElementById("e2e-table").innerHTML = html + "</tbody></table>";
-}
-
-function renderFailures(f) {
-  let t = "<table><thead><tr><th>Group</th><th>gpt-5-mini</th><th>gpt-5.4-nano</th><th>Meaning</th></tr></thead><tbody>";
-  f.taxonomy.rows.forEach((r) => {
-    t += `<tr><td>${r.group}</td><td style="text-align:right">${r.mini.toFixed(1)}%</td>` +
-      `<td style="text-align:right">${r.nano.toFixed(1)}%</td><td style="font-size:13px;color:var(--muted)">${r.meaning}</td></tr>`;
-  });
-  document.getElementById("fail-table").innerHTML = t + "</tbody></table>";
-
-  let j = "<table><thead><tr><th>Model</th><th>Plan</th><th>Followed</th><th>Followed + Mostly</th></tr></thead><tbody>";
-  f.trajectory.rows.forEach((r) => {
-    j += `<tr><td>${r.model}</td><td><span class="mode-chip${r.plan === "Ideal" ? " ideal" : ""}">${r.plan}</span></td>` +
-      `<td style="text-align:right">${r.followed.toFixed(1)}%</td><td style="text-align:right">${r.mostly.toFixed(1)}%</td></tr>`;
-  });
-  document.getElementById("traj-table").innerHTML = j + "</tbody></table>";
-}
-
 /* ---------- Easter egg: click the SANA wordmark 5× ---------- */
 
 function initEasterEgg() {
@@ -133,5 +89,4 @@ function showEgg() {
 /* ---------- boot ---------- */
 
 initDeltas();
-initMethodFindings();
 initEasterEgg();

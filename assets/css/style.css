@@ -746,6 +746,38 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 /* --- Right column: stack findings as a takeaway list --- */
 .right-col .findings { grid-template-columns: 1fr; gap: 12px; margin-top: 6px; }
 
+/* --- Home left card: lead paragraph + per-axis ideal captions + invite --- */
+.left-col .lead { margin-top: 0; font-size: 15.5px; }
+.framework-compact .fw-ideal { margin: 9px 0 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+.framework-compact .fw-ideal strong { color: var(--accent-deep); font-weight: 600; }
+.fw-invite { margin: 12px 0 0; font-size: 13px; color: var(--text); }
+
+/* --- Pipeline page: stage strip + numbered stage headings --- */
+.stage-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 18px 0 4px; }
+.stage-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); border-radius: 999px; padding: 7px 16px;
+  font-size: 14px; font-weight: 500; color: var(--primary); text-decoration: none;
+  transition: background .18s ease, border-color .18s ease;
+}
+.stage-chip span {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: 12px; font-weight: 700;
+}
+.stage-chip:hover { background: var(--accent-soft); border-color: var(--accent); }
+.stage-arrow { color: var(--muted); }
+.stage-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;
+  background: var(--accent); color: #fff; font-size: 16px; font-weight: 700;
+  vertical-align: middle;
+}
+@media (max-width: 560px) {
+  .stage-strip { flex-direction: column; align-items: flex-start; }
+  .stage-arrow { transform: rotate(90deg); }
+}
+
 /* --- Easter egg overlay (Sana from TWICE) --- */
 .egg-overlay {
   position: fixed; inset: 0; z-index: 1000;

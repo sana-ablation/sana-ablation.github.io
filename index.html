@@ -18,8 +18,7 @@
     <a class="brand" href="index.html">SANA</a>
     <nav class="site-nav">
       <a href="index.html" class="active">Home</a>
-      <a href="method.html">Method</a>
-      <a href="get-started.html">Get started</a>
+      <a href="pipeline.html">Pipeline</a>
     </nav>
   </div>
 </header>
@@ -56,25 +55,16 @@
 
       <!-- LEFT: intro + framework + links + citation -->
       <div class="card left-col">
-        <h3>What is SANA?</h3>
-        <p>
+        <p class="lead">
           SANA (Search Agent Navigation Ablation framework) diagnoses why LLM agents fail at
-          <strong>Exploratory QA</strong> over data lakes. It converts solved tasks into
-          <em>runtime profiles</em> — a gold source sequence, sanitized subquestions, and
-          execution records — and uses them to build <em>idealized</em> Planning, Search, and
-          Data-Analysis tools. Ablating one component at a time isolates its contribution; the
-          gap that remains when everything is idealized is attributable to the agent's
-          <strong>action policy</strong>.
+          <strong>Exploratory QA</strong> over data lakes. Each runtime component is swapped
+          between realistic and idealized implementations (default shown filled). The residual
+          gap when all three are idealized is the <strong>policy</strong>.
         </p>
 
         <hr class="card-divider" />
 
         <h3>The SANA ablation framework</h3>
-        <p style="font-size:14px;color:var(--muted);margin-top:0;">
-          Each runtime component is swapped between realistic and idealized implementations
-          (default shown filled). The residual gap when all three are idealized is the policy.
-          See the <a href="method.html">Method</a> page for details.
-        </p>
         <div class="framework framework-compact" id="framework">
           <div class="fw-col">
             <h4>Planning</h4>
@@ -83,6 +73,7 @@
               <li class="fw-mode"><span class="dot"></span>Standard</li>
               <li class="fw-mode is-active"><span class="dot"></span>Ideal</li>
             </ul>
+            <p class="fw-ideal"><strong>Ideal:</strong> gives the gold sanitized subquestions.</p>
           </div>
           <div class="fw-col">
             <h4>Search</h4>
@@ -92,6 +83,7 @@
               <li class="fw-mode is-active"><span class="dot"></span>Ideal</li>
               <li class="fw-mode"><span class="dot"></span>Preloaded</li>
             </ul>
+            <p class="fw-ideal"><strong>Ideal:</strong> always returns what the query wants from the task's gold source sequence.</p>
           </div>
           <div class="fw-col">
             <h4>Data Analysis</h4>
@@ -99,8 +91,13 @@
               <li class="fw-mode"><span class="dot"></span>Standard</li>
               <li class="fw-mode is-active"><span class="dot"></span>Ideal</li>
             </ul>
+            <p class="fw-ideal"><strong>Ideal:</strong> code has no implementation error and runs exactly as the agent intended when writing it.</p>
           </div>
         </div>
+        <p class="fw-invite">
+          Ablate any ideal axis with your own implementation — see the
+          <a href="pipeline.html">Pipeline</a>.
+        </p>
 
         <hr class="card-divider" />
 
@@ -163,7 +160,7 @@
 
 <footer class="site-footer">
   <div class="container-wide">
-    SANA · VLDB 2026 DASHSys · DAP Lab · <a href="method.html">Method</a> · <a href="get-started.html">Get started</a>
+    SANA · VLDB 2026 DASHSys · DAP Lab · <a href="pipeline.html">Pipeline</a>
   </div>
 </footer>
 
