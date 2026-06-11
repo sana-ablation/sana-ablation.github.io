@@ -728,3 +728,7 @@ table.matrix tr.is-hot { background: var(--accent-soft); }
 @media (max-width: 760px) {
   .framework, .findings { grid-template-columns: 1fr; }
 }
+
+.dchip { border:1px solid var(--border,#e4e4ea); background:#fff; border-radius:999px; padding:2px 10px; font:inherit; font-size:12px; cursor:pointer; color:var(--muted); }
+.dchip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.delta-group .label { font-size:13px; font-weight:600; margin-bottom:4px; }

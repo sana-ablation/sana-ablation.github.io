@@ -123,3 +123,82 @@ function initDiagramLink() {
     modeEl.addEventListener("blur", off);
   });
 }
+
+async function initMethodFindings() {
+  if (!document.getElementById("e2e-table")) return;
+  const [e2e, deltas, failures] = await Promise.all([
+    fetch("assets/data/endtoend.json").then((r) => r.json()),
+    fetch("assets/data/deltas.json").then((r) => r.json()),
+    fetch("assets/data/failures.json").then((r) => r.json()),
+  ]);
+  renderE2E(e2e);
+  renderDeltas(deltas);
+  renderFailures(failures);
+}
+
+function renderE2E(e2e) {
+  const benches = ["LakeQA", "KramaBench"];
+  const models = ["gpt-5.4-nano", "gpt-5-mini"];
+  let html = "<table><thead><tr><th>Benchmark</th><th>Model</th><th>Mode</th>" +
+    "<th>SM %</th><th>D_ret %</th><th>D_acc %</th><th>Ret</th><th>Acc</th></tr></thead><tbody>";
+  for (const b of benches) for (const m of models)
+    e2e[b][m].forEach((r, i) => {
+      html += `<tr><td>${i === 0 ? b : ""}</td><td>${i === 0 ? m : ""}</td>` +
+        `<td><span class="mode-chip${r.mode === "Ideal" ? " ideal" : ""}">${r.mode}</span></td>` +
+        `<td style="text-align:right">${r.sm.toFixed(1)}</td><td style="text-align:right">${r.dret.toFixed(1)}</td>` +
+        `<td style="text-align:right">${r.dacc.toFixed(1)}</td><td style="text-align:right">${r.ret_call.toFixed(1)}</td>` +
+        `<td style="text-align:right">${r.acc_call.toFixed(1)}</td></tr>`;
+    });
+  document.getElementById("e2e-table").innerHTML = html + "</tbody></table>";
+}
+
+const deltaState = { bench: "LakeQA", model: "gpt-5.4-nano", data: null };
+function renderDeltas(data) {
+  if (data) deltaState.data = data;
+  const ctrl = document.getElementById("delta-controls");
+  ctrl.innerHTML =
+    ["LakeQA", "KramaBench"].map((b) => `<button class="dchip${b === deltaState.bench ? " active" : ""}" data-b="${b}">${b}</button>`).join(" ") +
+    " · " +
+    ["gpt-5.4-nano", "gpt-5-mini"].map((m) => `<button class="dchip${m === deltaState.model ? " active" : ""}" data-m="${m}">${m}</button>`).join(" ");
+  ctrl.querySelectorAll("button").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      if (btn.dataset.b) deltaState.bench = btn.dataset.b;
+      if (btn.dataset.m) deltaState.model = btn.dataset.m;
+      renderDeltas();
+    }));
+
+  const groups = deltaState.data[deltaState.bench][deltaState.model];
+  const maxAbs = Math.max(...Object.values(groups).flat().map((d) => Math.abs(d.delta)), 1);
+  let html = "";
+  for (const [name, items] of Object.entries(groups)) {
+    html += `<div class="delta-group"><div class="label">${name}</div>`;
+    for (const it of items) {
+      const w = (Math.abs(it.delta) / maxAbs) * 100;
+      const z = it.delta === 0 ? " zero" : "";
+      const sign = it.delta > 0 ? "+" : "";
+      html += `<div class="delta-row"><span>${it.label}</span>` +
+        `<span><span class="delta-bar${z}" style="width:${w}%"></span></span>` +
+        `<span class="delta-val">${it.sm.toFixed(1)} (${sign}${it.delta.toFixed(1)})</span></div>`;
+    }
+    html += "</div>";
+  }
+  document.getElementById("delta-charts").innerHTML = html;
+}
+
+function renderFailures(f) {
+  let t = "<table><thead><tr><th>Group</th><th>gpt-5-mini</th><th>gpt-5.4-nano</th><th>Meaning</th></tr></thead><tbody>";
+  f.taxonomy.rows.forEach((r) => {
+    t += `<tr><td>${r.group}</td><td style="text-align:right">${r.mini.toFixed(1)}%</td>` +
+      `<td style="text-align:right">${r.nano.toFixed(1)}%</td><td style="font-size:13px;color:var(--muted)">${r.meaning}</td></tr>`;
+  });
+  document.getElementById("fail-table").innerHTML = t + "</tbody></table>";
+
+  let j = "<table><thead><tr><th>Model</th><th>Plan</th><th>Followed</th><th>Followed + Mostly</th></tr></thead><tbody>";
+  f.trajectory.rows.forEach((r) => {
+    j += `<tr><td>${r.model}</td><td><span class="mode-chip${r.plan === "Ideal" ? " ideal" : ""}">${r.plan}</span></td>` +
+      `<td style="text-align:right">${r.followed.toFixed(1)}%</td><td style="text-align:right">${r.mostly.toFixed(1)}%</td></tr>`;
+  });
+  document.getElementById("traj-table").innerHTML = j + "</tbody></table>";
+}
+
+initMethodFindings();

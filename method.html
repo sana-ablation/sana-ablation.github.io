@@ -118,7 +118,26 @@
   </p>
 </div></section>
 
-<!-- Findings sections added in Task 9 go here -->
+<section id="metrics-anchor"><div class="container-wide">
+  <h2>Findings</h2>
+
+  <h3>End-to-end mode comparison</h3>
+  <p style="font-size:13px;color:var(--muted)">Naive / Standard / Ideal end-to-end, per benchmark. SM is the primary metric.</p>
+  <div class="table-wrap" id="e2e-table"></div>
+
+  <h3 style="margin-top:28px;">Per-component deltas</h3>
+  <p style="font-size:13px;color:var(--muted)">Semantic-match gain from each mode (baseline = first bar).
+    <span id="delta-controls"></span></p>
+  <div id="delta-charts"></div>
+
+  <h3 style="margin-top:28px;">Failure taxonomy</h3>
+  <p style="font-size:13px;color:var(--muted)">Share of failure events by family (LakeQA traces).</p>
+  <div class="table-wrap" id="fail-table"></div>
+
+  <h3 style="margin-top:28px;">Plan-trajectory audit</h3>
+  <p style="font-size:13px;color:var(--muted)">Agents write good plans but don't reliably follow them.</p>
+  <div class="table-wrap" id="traj-table"></div>
+</div></section>
 
 <footer class="site-footer">
   <div class="container-wide">
