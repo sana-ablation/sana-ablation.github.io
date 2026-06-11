@@ -1,158 +1,15 @@
-// SANA site — explorer, diagram highlight, charts.
-const COLS = [
-  { key: "plan", label: "Plan", type: "mode" },
-  { key: "search", label: "Search", type: "mode" },
-  { key: "data_an", label: "Data An.", type: "mode" },
-  { key: "sm", label: "SM %", type: "num" },
-  { key: "dacc", label: "D_acc %", type: "num" },
-  { key: "dret", label: "D_ret %", type: "num" },
-  { key: "ret_call", label: "Ret calls", type: "num" },
-  { key: "acc_call", label: "Acc calls", type: "num" },
-];
+// SANA site — ablation delta charts, method findings, and an easter egg.
 
-const explorer = {
-  data: {},               // { lakeqa: {...}, kramabench: {...} }
-  bench: "lakeqa",
-  model: "gpt-5.4-nano",
-  sort: { key: "sm", dir: "desc" },
-};
-
-async function initExplorer() {
-  const tableEl = document.getElementById("lb-table");
-  if (!tableEl) return;
-  const [lake, krama] = await Promise.all([
-    fetch("assets/data/lakeqa_ablation.json").then((r) => r.json()),
-    fetch("assets/data/kramabench_ablation.json").then((r) => r.json()),
-  ]);
-  explorer.data = { lakeqa: lake, kramabench: krama };
-
-  document.querySelectorAll("#lb-tabs .tab").forEach((b) =>
-    b.addEventListener("click", () => {
-      explorer.bench = b.dataset.bench;
-      setActive("#lb-tabs .tab", b);
-      renderMatrix();
-    }));
-  document.querySelectorAll("#lb-model button").forEach((b) =>
-    b.addEventListener("click", () => {
-      explorer.model = b.dataset.model;
-      setActive("#lb-model button", b);
-      renderMatrix();
-    }));
-  renderMatrix();
-  initDiagramLink();
-}
-
-function setActive(sel, el) {
-  document.querySelectorAll(sel).forEach((x) => x.classList.remove("active"));
-  el.classList.add("active");
-}
-
-function rows() {
-  return explorer.data[explorer.bench].models[explorer.model];
-}
-
-function sortedRows() {
-  const { key, dir } = explorer.sort;
-  const mult = dir === "asc" ? 1 : -1;
-  return [...rows()].sort((a, b) => {
-    const av = a[key], bv = b[key];
-    if (av === null) return 1;            // nulls (D_ret "—") sink
-    if (bv === null) return -1;
-    if (typeof av === "number") return (av - bv) * mult;
-    return String(av).localeCompare(String(bv)) * mult;
-  });
-}
-
-function renderMatrix() {
-  const el = document.getElementById("lb-table");
-  const head = COLS.map((c) => {
-    const sortable = `data-sort="${c.key}"`;
-    const cls =
-      explorer.sort.key === c.key ? `sorted-${explorer.sort.dir}` : "";
-    return `<th ${sortable} class="${cls}">${c.label}</th>`;
-  }).join("");
-
-  const body = sortedRows().map((row) => {
-    const tds = COLS.map((c) => {
-      if (c.type === "mode") {
-        const cls = row[c.key] === "Ideal" ? "mode-chip ideal" : "mode-chip";
-        return `<td><span class="${cls}">${row[c.key]}</span></td>`;
-      }
-      const v = row[c.key];
-      return `<td style="text-align:right;font-variant-numeric:tabular-nums;">${v === null ? "—" : v.toFixed(1)}</td>`;
-    }).join("");
-    const id = `r-${row.plan}-${row.search}-${row.data_an}`;
-    return `<tr id="${id}" data-plan="${row.plan}" data-search="${row.search}" data-data_an="${row.data_an}">${tds}</tr>`;
-  }).join("");
-
-  el.innerHTML = `<table class="matrix"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
-
-  el.querySelectorAll("th[data-sort]").forEach((th) =>
-    th.addEventListener("click", () => {
-      const key = th.dataset.sort;
-      if (explorer.sort.key === key)
-        explorer.sort.dir = explorer.sort.dir === "asc" ? "desc" : "asc";
-      else explorer.sort = { key, dir: "desc" };
-      renderMatrix();
-    }));
-}
-
-initExplorer();
-
-function initDiagramLink() {
-  const fw = document.getElementById("framework");
-  const table = document.getElementById("lb-table");
-  if (!fw || !table) return;
-
-  fw.querySelectorAll(".fw-mode").forEach((modeEl) => {
-    const axis = modeEl.dataset.axis;   // plan | search | data_an
-    const mode = modeEl.dataset.mode;
-    const on = () => {
-      modeEl.classList.add("is-hot");
-      table.querySelectorAll("tbody tr").forEach((tr) => {
-        if (tr.dataset[axis] === mode) tr.classList.add("is-hot");
-      });
-    };
-    const off = () => {
-      modeEl.classList.remove("is-hot");
-      table.querySelectorAll("tbody tr.is-hot").forEach((tr) => tr.classList.remove("is-hot"));
-    };
-    modeEl.addEventListener("mouseenter", on);
-    modeEl.addEventListener("mouseleave", off);
-    modeEl.addEventListener("focus", on);
-    modeEl.addEventListener("blur", off);
-  });
-}
-
-async function initMethodFindings() {
-  if (!document.getElementById("e2e-table")) return;
-  const [e2e, deltas, failures] = await Promise.all([
-    fetch("assets/data/endtoend.json").then((r) => r.json()),
-    fetch("assets/data/deltas.json").then((r) => r.json()),
-    fetch("assets/data/failures.json").then((r) => r.json()),
-  ]);
-  renderE2E(e2e);
-  renderDeltas(deltas);
-  renderFailures(failures);
-}
-
-function renderE2E(e2e) {
-  const benches = ["LakeQA", "KramaBench"];
-  const models = ["gpt-5.4-nano", "gpt-5-mini"];
-  let html = "<table><thead><tr><th>Benchmark</th><th>Model</th><th>Mode</th>" +
-    "<th>SM %</th><th>D_ret %</th><th>D_acc %</th><th>Ret</th><th>Acc</th></tr></thead><tbody>";
-  for (const b of benches) for (const m of models)
-    e2e[b][m].forEach((r, i) => {
-      html += `<tr><td>${i === 0 ? b : ""}</td><td>${i === 0 ? m : ""}</td>` +
-        `<td><span class="mode-chip${r.mode === "Ideal" ? " ideal" : ""}">${r.mode}</span></td>` +
-        `<td style="text-align:right">${r.sm.toFixed(1)}</td><td style="text-align:right">${r.dret.toFixed(1)}</td>` +
-        `<td style="text-align:right">${r.dacc.toFixed(1)}</td><td style="text-align:right">${r.ret_call.toFixed(1)}</td>` +
-        `<td style="text-align:right">${r.acc_call.toFixed(1)}</td></tr>`;
-    });
-  document.getElementById("e2e-table").innerHTML = html + "</tbody></table>";
-}
+/* ---------- Ablation delta charts (Home right column + Method) ---------- */
 
 const deltaState = { bench: "LakeQA", model: "gpt-5.4-nano", data: null };
+
+async function initDeltas() {
+  if (!document.getElementById("delta-charts")) return;
+  const data = await fetch("assets/data/deltas.json").then((r) => r.json());
+  renderDeltas(data);
+}
+
 function renderDeltas(data) {
   if (data) deltaState.data = data;
   const ctrl = document.getElementById("delta-controls");
@@ -185,6 +42,34 @@ function renderDeltas(data) {
   document.getElementById("delta-charts").innerHTML = html;
 }
 
+/* ---------- Method findings: end-to-end + failure tables ---------- */
+
+async function initMethodFindings() {
+  if (!document.getElementById("e2e-table")) return;
+  const [e2e, failures] = await Promise.all([
+    fetch("assets/data/endtoend.json").then((r) => r.json()),
+    fetch("assets/data/failures.json").then((r) => r.json()),
+  ]);
+  renderE2E(e2e);
+  renderFailures(failures);
+}
+
+function renderE2E(e2e) {
+  const benches = ["LakeQA", "KramaBench"];
+  const models = ["gpt-5.4-nano", "gpt-5-mini"];
+  let html = "<table><thead><tr><th>Benchmark</th><th>Model</th><th>Mode</th>" +
+    "<th>SM %</th><th>D_ret %</th><th>D_acc %</th><th>Ret</th><th>Acc</th></tr></thead><tbody>";
+  for (const b of benches) for (const m of models)
+    e2e[b][m].forEach((r, i) => {
+      html += `<tr><td>${i === 0 ? b : ""}</td><td>${i === 0 ? m : ""}</td>` +
+        `<td><span class="mode-chip${r.mode === "Ideal" ? " ideal" : ""}">${r.mode}</span></td>` +
+        `<td style="text-align:right">${r.sm.toFixed(1)}</td><td style="text-align:right">${r.dret.toFixed(1)}</td>` +
+        `<td style="text-align:right">${r.dacc.toFixed(1)}</td><td style="text-align:right">${r.ret_call.toFixed(1)}</td>` +
+        `<td style="text-align:right">${r.acc_call.toFixed(1)}</td></tr>`;
+    });
+  document.getElementById("e2e-table").innerHTML = html + "</tbody></table>";
+}
+
 function renderFailures(f) {
   let t = "<table><thead><tr><th>Group</th><th>gpt-5-mini</th><th>gpt-5.4-nano</th><th>Meaning</th></tr></thead><tbody>";
   f.taxonomy.rows.forEach((r) => {
@@ -201,4 +86,47 @@ function renderFailures(f) {
   document.getElementById("traj-table").innerHTML = j + "</tbody></table>";
 }
 
+/* ---------- Easter egg: click the SANA wordmark 5× ---------- */
+
+function initEasterEgg() {
+  const trigger = document.querySelector(".hero h1");
+  if (!trigger) return;
+  trigger.style.cursor = "pointer";
+  let clicks = 0;
+  let timer;
+  trigger.addEventListener("click", () => {
+    clicks += 1;
+    clearTimeout(timer);
+    timer = setTimeout(() => { clicks = 0; }, 1200);
+    if (clicks >= 5) { clicks = 0; showEgg(); }
+  });
+}
+
+function showEgg() {
+  if (document.getElementById("sana-egg")) return;
+  const ov = document.createElement("div");
+  ov.id = "sana-egg";
+  ov.className = "egg-overlay";
+  ov.innerHTML =
+    '<div class="egg-card" role="dialog" aria-label="The other SANA">' +
+    '<button class="egg-close" aria-label="Close">×</button>' +
+    '<img src="assets/sana.jpg" alt="Sana from TWICE" />' +
+    '<p class="egg-cap">the <em>other</em> SANA — from TWICE ✨</p>' +
+    "</div>";
+  const close = () => {
+    ov.remove();
+    document.removeEventListener("keydown", onKey);
+  };
+  function onKey(e) { if (e.key === "Escape") close(); }
+  ov.addEventListener("click", (e) => {
+    if (e.target === ov || e.target.classList.contains("egg-close")) close();
+  });
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(ov);
+}
+
+/* ---------- boot ---------- */
+
+initDeltas();
 initMethodFindings();
+initEasterEgg();

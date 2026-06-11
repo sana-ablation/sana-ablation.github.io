@@ -37,113 +37,112 @@
 
 <section class="home-section">
   <div class="container-wide">
-    <h3>The SANA ablation framework</h3>
-    <p style="color:var(--muted);max-width:70ch;">
-      SANA turns solved EQA tasks into runtime profiles, then swaps each runtime component
-      between idealized and realistic implementations. The residual gap diagnoses the agent's policy.
-      Hover a mode to highlight its row in the results below.
-    </p>
-    <div class="framework" id="framework">
-      <div class="fw-col">
-        <h4>Planning</h4>
-        <ul class="fw-modes">
-          <li class="fw-mode" data-axis="plan" data-mode="Naive"><span class="dot"></span>Naive</li>
-          <li class="fw-mode" data-axis="plan" data-mode="Standard"><span class="dot"></span>Standard</li>
-          <li class="fw-mode is-active" data-axis="plan" data-mode="Ideal"><span class="dot"></span>Ideal</li>
-        </ul>
-      </div>
-      <div class="fw-col">
-        <h4>Search</h4>
-        <ul class="fw-modes">
-          <li class="fw-mode" data-axis="search" data-mode="Naive"><span class="dot"></span>Naive · BM25</li>
-          <li class="fw-mode" data-axis="search" data-mode="Standard"><span class="dot"></span>Standard · Hybrid</li>
-          <li class="fw-mode is-active" data-axis="search" data-mode="Ideal"><span class="dot"></span>Ideal</li>
-          <li class="fw-mode" data-axis="search" data-mode="Preloaded"><span class="dot"></span>Preloaded</li>
-        </ul>
-      </div>
-      <div class="fw-col">
-        <h4>Data Analysis</h4>
-        <ul class="fw-modes">
-          <li class="fw-mode" data-axis="data_an" data-mode="Standard"><span class="dot"></span>Standard</li>
-          <li class="fw-mode is-active" data-axis="data_an" data-mode="Ideal"><span class="dot"></span>Ideal</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
+    <div class="home-grid">
 
-<section class="home-section">
-  <div class="container-wide">
-    <div class="card">
-      <h3>What is SANA?</h3>
-      <p>
-        SANA (Search Agent Navigation Ablation framework) diagnoses why LLM agents fail at
-        <strong>Exploratory QA</strong> over data lakes. It converts solved tasks into
-        <em>runtime profiles</em> — a gold source sequence, sanitized subquestions, and
-        execution records — and uses them to build <em>idealized</em> Planning, Search, and
-        Data-Analysis tools. Ablating one component at a time isolates its contribution; the
-        gap that remains when everything is idealized is attributable to the agent's
-        <strong>action policy</strong>. See the <a href="method.html">Method</a> page for details.
-      </p>
-    </div>
+      <!-- LEFT: intro + framework + links + citation -->
+      <div class="card left-col">
+        <h3>What is SANA?</h3>
+        <p>
+          SANA (Search Agent Navigation Ablation framework) diagnoses why LLM agents fail at
+          <strong>Exploratory QA</strong> over data lakes. It converts solved tasks into
+          <em>runtime profiles</em> — a gold source sequence, sanitized subquestions, and
+          execution records — and uses them to build <em>idealized</em> Planning, Search, and
+          Data-Analysis tools. Ablating one component at a time isolates its contribution; the
+          gap that remains when everything is idealized is attributable to the agent's
+          <strong>action policy</strong>.
+        </p>
 
-    <h3 style="margin-top:28px;">Ablation results</h3>
-    <p style="font-size:13px;color:var(--muted);margin:0 0 6px;">
-      Vary one axis while holding the others idealized. Click any numeric column to sort.
-      Preloaded has no retrieval step, so D_ret is "—".
-    </p>
-    <div class="explorer-controls">
-      <div class="tabs" id="lb-tabs">
-        <button class="tab active" data-bench="lakeqa">LakeQA (135)</button>
-        <button class="tab" data-bench="kramabench">KramaBench (83)</button>
-      </div>
-      <div class="toggle" id="lb-model">
-        <button class="active" data-model="gpt-5.4-nano">gpt-5.4-nano</button>
-        <button data-model="gpt-5-mini">gpt-5-mini</button>
-      </div>
-    </div>
-    <div class="table-wrap" id="lb-table"></div>
-  </div>
-</section>
+        <hr class="card-divider" />
 
-<section class="home-section">
-  <div class="container-wide">
-    <h3>What we found</h3>
-    <div class="findings">
-      <div class="finding">
-        <h4>Data analysis is the consistent bottleneck</h4>
-        <p>Idealizing execution gives large gains on both benchmarks (up to +24.1%), even when sources are already found.</p>
-      </div>
-      <div class="finding">
-        <h4>Search dominates on the large lake</h4>
-        <p>On LakeQA's ~40M-file lake, ideal search beats BM25 by +13–14%; on the small KramaBench it matters far less.</p>
-      </div>
-      <div class="finding">
-        <h4>Plans are written, not followed</h4>
-        <p>Agents produce near-gold decompositions (~78–82% match) yet only follow them ~28–57% of the time.</p>
-      </div>
-    </div>
+        <h3>The SANA ablation framework</h3>
+        <p style="font-size:14px;color:var(--muted);margin-top:0;">
+          Each runtime component is swapped between realistic and idealized implementations
+          (default shown filled). The residual gap when all three are idealized is the policy.
+          See the <a href="method.html">Method</a> page for details.
+        </p>
+        <div class="framework framework-compact" id="framework">
+          <div class="fw-col">
+            <h4>Planning</h4>
+            <ul class="fw-modes">
+              <li class="fw-mode"><span class="dot"></span>Naive</li>
+              <li class="fw-mode"><span class="dot"></span>Standard</li>
+              <li class="fw-mode is-active"><span class="dot"></span>Ideal</li>
+            </ul>
+          </div>
+          <div class="fw-col">
+            <h4>Search</h4>
+            <ul class="fw-modes">
+              <li class="fw-mode"><span class="dot"></span>Naive · BM25</li>
+              <li class="fw-mode"><span class="dot"></span>Standard · Hybrid</li>
+              <li class="fw-mode is-active"><span class="dot"></span>Ideal</li>
+              <li class="fw-mode"><span class="dot"></span>Preloaded</li>
+            </ul>
+          </div>
+          <div class="fw-col">
+            <h4>Data Analysis</h4>
+            <ul class="fw-modes">
+              <li class="fw-mode"><span class="dot"></span>Standard</li>
+              <li class="fw-mode is-active"><span class="dot"></span>Ideal</li>
+            </ul>
+          </div>
+        </div>
 
-    <div class="inline-links" style="margin-top:24px;">
-      <a href="#" id="paper-link">Paper (PDF) ↗</a>
-      <a href="https://github.com/Austin-Senna/exploratory-qa-eval">Code (GitHub) ↗</a>
-      <a href="#" id="data-link">Dataset ↗</a>
-    </div>
-    <p style="font-size:12px;color:var(--muted);margin-top:6px;">
-      <!-- TODO before launch: set #paper-link and #data-link hrefs; remove this note. -->
-      Paper and dataset links are placeholders pending the public release.
-    </p>
+        <hr class="card-divider" />
 
-    <h3 style="margin-top:28px;">Citation</h3>
-    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
-      To appear at the VLDB 2026 Workshop on Systems for Data-centric Agents with Human-in-the-loop (DASHSys).
-    </p>
-    <pre class="bibtex">@inproceedings{sana2026,
+        <div class="inline-links">
+          <a href="#" id="paper-link">Paper (PDF) ↗</a>
+          <a href="https://github.com/Austin-Senna/exploratory-qa-eval">Code (GitHub) ↗</a>
+          <a href="#" id="data-link">Dataset ↗</a>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:6px;">
+          <!-- TODO before launch: set #paper-link and #data-link hrefs; remove this note. -->
+          Paper and dataset links are placeholders pending the public release.
+        </p>
+
+        <hr class="card-divider" />
+
+        <h3>Citation</h3>
+        <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+          To appear at the VLDB 2026 Workshop on Systems for Data-centric Agents with
+          Human-in-the-loop (DASHSys).
+        </p>
+        <pre class="bibtex">@inproceedings{sana2026,
   title     = {SANA: What Matters for QA Agents over Massive Data Lakes?},
   author    = {Wijaya, Austin Senna and Liu, Jiaxiang and Wang, Haonan and Wu, Eugene},
   booktitle = {VLDB 2026 Workshop on Systems for Data-centric Agents with Human-in-the-loop (DASHSys)},
   year      = {2026}
 }</pre>
+      </div>
+
+      <!-- RIGHT: ablation deltas + what we found -->
+      <div class="card right-col">
+        <h3>Ablation deltas</h3>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 10px;">
+          Semantic-match gain from idealizing each component (baseline = first bar of each group).
+          <span id="delta-controls"></span>
+        </p>
+        <div id="delta-charts"></div>
+
+        <hr class="card-divider" />
+
+        <h3>What we found</h3>
+        <div class="findings">
+          <div class="finding">
+            <h4>Data analysis is the consistent bottleneck</h4>
+            <p>Idealizing execution gives large gains on both benchmarks (up to +24.1%), even when sources are already found.</p>
+          </div>
+          <div class="finding">
+            <h4>Search dominates on the large lake</h4>
+            <p>On LakeQA's ~40M-file lake, ideal search beats BM25 by +13–14%; on the small KramaBench it matters far less.</p>
+          </div>
+          <div class="finding">
+            <h4>Plans are written, not followed</h4>
+            <p>Agents produce near-gold decompositions (~78–82% match) yet only follow them ~28–57% of the time.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
 

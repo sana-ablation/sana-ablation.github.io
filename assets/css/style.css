@@ -697,15 +697,7 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 .fw-mode.is-active .dot { background: var(--accent); }
 .fw-mode:hover, .fw-mode.is-hot { background: var(--accent-soft); color: var(--accent-deep); }
 
-/* --- Results explorer --- */
-.explorer-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 6px 0 14px; }
-.toggle { display: inline-flex; border: 1px solid var(--border, #e4e4ea); border-radius: 999px; overflow: hidden; }
-.toggle button { border: 0; background: #fff; padding: 6px 14px; font: inherit; cursor: pointer; color: var(--muted); }
-.toggle button.active { background: var(--accent); color: #fff; }
-table.matrix th[data-sort] { cursor: pointer; user-select: none; white-space: nowrap; }
-table.matrix th[data-sort].sorted-asc::after  { content: " \25B2"; font-size: 10px; }
-table.matrix th[data-sort].sorted-desc::after { content: " \25BC"; font-size: 10px; }
-table.matrix tr.is-hot { background: var(--accent-soft); }
+/* --- Mode chips (Method end-to-end / trajectory tables) --- */
 .mode-chip { font-size: 12px; padding: 1px 7px; border-radius: 999px; background: #f3f3f6; color: var(--ink); }
 .mode-chip.ideal { background: var(--accent-soft); color: var(--accent-deep); }
 
@@ -732,3 +724,42 @@ table.matrix tr.is-hot { background: var(--accent-soft); }
 .dchip { border:1px solid var(--border,#e4e4ea); background:#fff; border-radius:999px; padding:2px 10px; font:inherit; font-size:12px; cursor:pointer; color:var(--muted); }
 .dchip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 .delta-group .label { font-size:13px; font-weight:600; margin-bottom:4px; }
+
+/* --- Compact framework diagram for the narrow left column --- */
+.framework-compact { grid-template-columns: 1fr; gap: 10px; margin: 6px 0 4px; }
+.framework-compact .fw-col { border-radius: 10px; padding: 10px 12px; }
+.framework-compact .fw-col > h4 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.framework-compact .fw-modes { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.framework-compact .fw-mode { gap: 6px; font-size: 13px; padding: 3px 9px; border: 1px solid var(--border); border-radius: 999px; cursor: default; }
+.framework-compact .fw-mode .dot { width: 7px; height: 7px; }
+.framework-compact .fw-mode.is-active { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--accent); font-weight: 600; }
+.framework-compact .fw-mode:hover { background: transparent; color: var(--muted); }
+.framework-compact .fw-mode.is-active:hover { background: var(--accent-soft); color: var(--accent-deep); }
+
+/* --- Right column: stack findings as a takeaway list --- */
+.right-col .findings { grid-template-columns: 1fr; gap: 12px; margin-top: 6px; }
+
+/* --- Easter egg overlay (Sana from TWICE) --- */
+.egg-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(26, 26, 31, 0.55); backdrop-filter: blur(2px);
+  animation: egg-fade .18s ease-out both;
+}
+.egg-card {
+  position: relative; background: #fff; border-radius: 14px; padding: 14px;
+  max-width: min(86vw, 420px); box-shadow: 0 24px 60px -20px rgba(26,26,31,0.5);
+  animation: egg-pop .22s cubic-bezier(.2,.8,.25,1.2) both;
+}
+.egg-card img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.egg-cap { margin: 12px 4px 4px; text-align: center; font-size: 15px; color: var(--ink); }
+.egg-close {
+  position: absolute; top: 6px; right: 10px; border: 0; background: transparent;
+  font-size: 26px; line-height: 1; color: #fff; cursor: pointer;
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+@keyframes egg-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes egg-pop { from { opacity: 0; transform: scale(.9) translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .egg-overlay, .egg-card { animation: none; }
+}
