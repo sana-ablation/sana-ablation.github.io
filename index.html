@@ -35,7 +35,44 @@
   </div>
 </section>
 
-<!-- Sections added in Tasks 4-7 go here -->
+<section class="home-section">
+  <div class="container-wide">
+    <h3>The SANA ablation framework</h3>
+    <p style="color:var(--muted);max-width:70ch;">
+      SANA turns solved EQA tasks into runtime profiles, then swaps each runtime component
+      between idealized and realistic implementations. The residual gap diagnoses the agent's policy.
+      Hover a mode to highlight its row in the results below.
+    </p>
+    <div class="framework" id="framework">
+      <div class="fw-col">
+        <h4>Planning</h4>
+        <ul class="fw-modes">
+          <li class="fw-mode" data-axis="plan" data-mode="Naive"><span class="dot"></span>Naive</li>
+          <li class="fw-mode" data-axis="plan" data-mode="Standard"><span class="dot"></span>Standard</li>
+          <li class="fw-mode is-active" data-axis="plan" data-mode="Ideal"><span class="dot"></span>Ideal</li>
+        </ul>
+      </div>
+      <div class="fw-col">
+        <h4>Search</h4>
+        <ul class="fw-modes">
+          <li class="fw-mode" data-axis="search" data-mode="Naive"><span class="dot"></span>Naive · BM25</li>
+          <li class="fw-mode" data-axis="search" data-mode="Standard"><span class="dot"></span>Standard · Hybrid</li>
+          <li class="fw-mode is-active" data-axis="search" data-mode="Ideal"><span class="dot"></span>Ideal</li>
+          <li class="fw-mode" data-axis="search" data-mode="Preloaded"><span class="dot"></span>Preloaded</li>
+        </ul>
+      </div>
+      <div class="fw-col">
+        <h4>Data Analysis</h4>
+        <ul class="fw-modes">
+          <li class="fw-mode" data-axis="data_an" data-mode="Standard"><span class="dot"></span>Standard</li>
+          <li class="fw-mode is-active" data-axis="data_an" data-mode="Ideal"><span class="dot"></span>Ideal</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sections added in Tasks 5-7 go here -->
 
 <footer class="site-footer">
   <div class="container-wide">
