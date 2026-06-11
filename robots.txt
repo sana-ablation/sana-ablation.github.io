@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sana-ablation.github.io/sana-ablation/sitemap.xml
+Sitemap: https://sana-ablation.github.io/sitemap.xml
