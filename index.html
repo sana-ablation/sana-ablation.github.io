@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SANA — What Matters for QA Agents over Massive Data Lakes?</title>
-  <meta name="description" content="SANA: a diagnostic ablation framework that pinpoints where data-lake agents fail — search, planning, data analysis, or policy." />
+  <meta name="description" content="SANA: a diagnostic ablation framework that idealizes exploratory question-answering in search, planning, and data analysis." />
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,8 +26,7 @@
 <section class="hero">
   <div class="container-wide">
     <h1>SANA</h1>
-    <p class="tagline">What matters for QA agents over massive data lakes?</p>
-    <p class="subtagline">A diagnostic ablation framework that pinpoints where data-lake agents fail — search, planning, data analysis, or policy.</p>
+    <p class="tagline">A diagnostic ablation framework that idealizes exploratory question-answering in search, planning, data analysis.</p>
 
     <div class="hero-stats">
       <div class="hero-stats-label">Current benchmark results</div>
@@ -114,10 +113,10 @@
       <!-- RIGHT: ablation deltas + what we found -->
       <div class="card right-col">
         <h3>Ablation deltas</h3>
-        <p style="font-size:13px;color:var(--muted);margin:0 0 10px;">
+        <p style="font-size:13px;color:var(--muted);margin:0 0 12px;">
           Semantic-match gain from idealizing each component (baseline = first bar of each group).
-          <span id="delta-controls"></span>
         </p>
+        <div class="delta-controls" id="delta-controls"></div>
         <div id="delta-charts"></div>
 
         <hr class="card-divider" />

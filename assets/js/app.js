@@ -10,20 +10,38 @@ async function initDeltas() {
   renderDeltas(data);
 }
 
+const BENCHES = ["LakeQA", "KramaBench"];
+const MODELS = ["gpt-5.4-nano", "gpt-5-mini"];
+// Longest bar uses this fraction of the track, leaving room for the inline label.
+const BAR_MAX_PCT = 70;
+
 function renderDeltas(data) {
   if (data) deltaState.data = data;
   const ctrl = document.getElementById("delta-controls");
-  ctrl.innerHTML =
-    ["LakeQA", "KramaBench"].map((b) => `<button class="dchip${b === deltaState.bench ? " active" : ""}" data-b="${b}">${b}</button>`).join(" ") +
-    " · " +
-    ["gpt-5.4-nano", "gpt-5-mini"].map((m) => `<button class="dchip${m === deltaState.model ? " active" : ""}" data-m="${m}">${m}</button>`).join(" ");
-  ctrl.querySelectorAll("button").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      if (btn.dataset.b) deltaState.bench = btn.dataset.b;
-      if (btn.dataset.m) deltaState.model = btn.dataset.m;
-      renderDeltas();
-    }));
 
+  // Build the two dropdowns once, then just keep them in sync with state.
+  if (!ctrl.dataset.ready) {
+    const opts = (vals, sel) =>
+      vals.map((v) => `<option value="${v}"${v === sel ? " selected" : ""}>${v}</option>`).join("");
+    ctrl.innerHTML =
+      `<label class="d-select">Benchmark <select id="d-bench">${opts(BENCHES, deltaState.bench)}</select></label>` +
+      `<label class="d-select">Model <select id="d-model">${opts(MODELS, deltaState.model)}</select></label>`;
+    ctrl.dataset.ready = "1";
+    ctrl.querySelector("#d-bench").addEventListener("change", (e) => {
+      deltaState.bench = e.target.value;
+      renderDeltaCharts();
+    });
+    ctrl.querySelector("#d-model").addEventListener("change", (e) => {
+      deltaState.model = e.target.value;
+      renderDeltaCharts();
+    });
+  }
+  ctrl.querySelector("#d-bench").value = deltaState.bench;
+  ctrl.querySelector("#d-model").value = deltaState.model;
+  renderDeltaCharts();
+}
+
+function renderDeltaCharts() {
   const groups = deltaState.data[deltaState.bench][deltaState.model];
   // Bar length is proportional to absolute SM (like the paper); color encodes the delta sign.
   const maxSM = Math.max(...Object.values(groups).flat().map((d) => d.sm), 1);
@@ -31,7 +49,7 @@ function renderDeltas(data) {
   for (const [name, items] of Object.entries(groups)) {
     html += `<div class="delta-group"><div class="label">${name}</div>`;
     for (const it of items) {
-      const w = (it.sm / maxSM) * 100;
+      const w = (it.sm / maxSM) * BAR_MAX_PCT;
       const cls = it.delta > 0 ? "up" : it.delta < 0 ? "down" : "base";
       const dcls = it.delta > 0 ? "d-pos" : it.delta < 0 ? "d-neg" : "";
       const sign = it.delta >= 0 ? "+" : "";         // negatives already carry "-"
