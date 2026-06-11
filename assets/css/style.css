@@ -746,11 +746,28 @@ th.sortable.sort-desc .sort-arrow::after { content: "▼"; color: var(--primary)
 /* --- Right column: stack findings as a takeaway list --- */
 .right-col .findings { grid-template-columns: 1fr; gap: 12px; margin-top: 6px; }
 
-/* --- Home left card: lead paragraph + per-axis ideal captions + invite --- */
-.left-col .lead { margin-top: 0; font-size: 15.5px; }
-.framework-compact .fw-ideal { margin: 9px 0 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+/* --- Home left card: framework description + per-axis ideal captions + invite --- */
+.fw-desc { margin: 0 0 14px; font-size: 15px; color: var(--text); }
+.framework-compact .fw-col { padding: 12px 14px; }
+.framework-compact .fw-col > h4 { margin: 0 0 6px; }
+.framework-compact .fw-ideal { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .framework-compact .fw-ideal strong { color: var(--accent-deep); font-weight: 600; }
-.fw-invite { margin: 12px 0 0; font-size: 13px; color: var(--text); }
+.fw-invite {
+  margin: 14px 0 0; font-size: 13px; line-height: 1.5; color: var(--accent-deep);
+  background: var(--accent-soft); border-radius: 8px; padding: 11px 14px;
+}
+.fw-invite a { font-weight: 600; }
+
+/* --- Boxed link buttons with icons --- */
+.link-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.link-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); border-radius: 8px; padding: 9px 15px;
+  background: #fff; color: var(--primary); font-size: 14px; font-weight: 500;
+  text-decoration: none; transition: background .18s ease, border-color .18s ease;
+}
+.link-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+.link-btn svg { width: 17px; height: 17px; flex: none; }
 
 /* --- Pipeline page: stage strip + numbered stage headings --- */
 .stage-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 18px 0 4px; }
