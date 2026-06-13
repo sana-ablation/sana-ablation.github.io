@@ -42,7 +42,7 @@
 <div class="page-title-strip">
   <div class="container-wide">
     <h1>Pipeline</h1>
-    <p>From a benchmark to a diagnosis, in three modular stages — profile, evaluate, analyze.</p>
+    <p>From a benchmark to a diagnosis, in three independent stages — profile, evaluate, analyze.</p>
   </div>
 </div>
 
@@ -52,7 +52,7 @@
     <code>Q</code>, a data lake <code>D</code>, the minimal gold sources <code>D<sub>gold</sub></code>
     sufficient to answer it, a tool set <code>T</code> (dataset <strong>search</strong> <code>f(q,k)</code>
     and <strong>data analysis</strong> <code>g(c,d)</code>), the gold answer <code>A★</code>, and a
-    tool-call budget <code>B</code> (we use B = 30). SANA runs as three modules you can use independently:
+    tool-call budget <code>B</code> (we use B = 30). SANA runs as three phases you can use independently:
   </p>
   <div class="stage-strip">
     <a class="stage-chip" href="#profiling"><span>1</span> sana-profiling</a>
@@ -67,85 +67,61 @@
 <section id="profiling"><div class="container-wide">
   <h2><span class="stage-num">1</span> sana-profiling</h2>
   <p>
-    Profiling converts a benchmark into a LakeQA-style EQA task, then annotates it into a
-    <strong>runtime profile</strong> that powers the idealized tools. A profile has three parts:
+    Profiling mirrors a benchmark task into a LakeQA-style EQA task and a matching
+    <strong>runtime profile</strong> — the artifact that powers every idealized tool. A profile records:
   </p>
   <ul>
-    <li><strong>Source sequence</strong> — the ordered gold datasets needed for each subquestion.</li>
-    <li><strong>Sanitized subquestions</strong> — subquestions rewritten so they don't leak which dataset to fetch.</li>
-    <li><strong>Execution records</strong> — per dataset: the analysis intent, the query, and the verified answer.</li>
+    <li><strong><code>source_sequence</code> / <code>dataset_sequence</code></strong> — the ordered gold sources each step needs.</li>
+    <li><strong><code>reasoning_chain_text</code></strong> — the answer-safe decomposition (sub-questions that don't leak which dataset to fetch).</li>
+    <li><strong><code>ideal_query</code> / <code>ideal_code</code></strong> — per node: the intent, the verified SQL or Python, and the gold intermediate answer.</li>
   </ul>
-  <p>
-    KramaBench tasks (a monolithic question + solution script) are first decomposed into LakeQA-style
-    sequential, dependent hops, each execution-verified against its intermediate answer. Example profile,
-    adapted from a LakeQA task:
-  </p>
-  <pre class="json-viewer"><code>{
-  "task": "Compute the 2023 ratio of top-offense complaints to shootings in NYC's northernmost borough (rounded).",
-  "source_sequence": ["The_Bronx", "nypd-complaints", "nypd-shootings"],
-  "sanitized_subquestions": [
-    "find NYC's northernmost borough",
-    "count complaints there for the top 2023 offense",
-    "count 2023 shootings there; divide (2)/(3), round"
-  ],
-  "execution_records": [
-    { "src": "nypd-complaints", "intent": "count 2023 top-offense complaints in the Bronx",
-      "query": "CNT(*) WHERE BORO='BRONX' & yr=2023 GRP_BY OFNS_DESC", "answer": 18613 },
-    { "src": "nypd-shootings", "intent": "node_1_ans / 2023 Bronx shooting count",
-      "query": "ROUND(18613 / CNT(*)) WHERE BORO='BRONX' & yr=2023", "answer": 42 }
-  ]
-}</code></pre>
-  <p class="json-caption">Subquestion 1 only retrieves the <code>The_Bronx</code> dataset, so it has no execution record.</p>
+  <figure class="profile-figure">
+    <img src="../assets/task-to-profile-mirror.png" alt="A SANA task mirrored into its runtime profile: source sequence, sanitized subquestions, and per-node execution records with verified answers." />
+    <figcaption>A task (top) mirrored into the SANA profile it produces (bottom).</figcaption>
+  </figure>
 
-  <p>The profile is what each <strong>idealized</strong> tool draws on:</p>
+  <p>The profile is what each <strong>ideal</strong> mode draws on at evaluation time:</p>
   <div class="metric-groups">
-    <div class="metric-group"><h4>plan_ideal</h4><p style="font-size:14px;color:var(--muted)">Gives the gold sanitized subquestions as an explicit decomposition.</p></div>
-    <div class="metric-group"><h4>search_ideal</h4><p style="font-size:14px;color:var(--muted)">Always returns what the query wants from the task's gold source sequence (nothing irrelevant).</p></div>
-    <div class="metric-group"><h4>execute_ideal</h4><p style="font-size:14px;color:var(--muted)">Code has no implementation error and runs exactly as the agent intended when writing it.</p></div>
+    <div class="metric-group"><h4><code>--profile ideal</code></h4><p style="font-size:14px;color:var(--muted)">Exposes the gold reasoning chain as an explicit, answer-safe decomposition.</p></div>
+    <div class="metric-group"><h4><code>--search ideal</code></h4><p style="font-size:14px;color:var(--muted)">Returns exactly the gold sources each query needs from the source sequence — nothing irrelevant.</p></div>
+    <div class="metric-group"><h4><code>--compute ideal</code></h4><p style="font-size:14px;color:var(--muted)">Runs the profile's ideal SQL/Python — no implementation error, exactly as the agent intended.</p></div>
   </div>
 
-  <pre class="bibtex"># [FILL IN — exact CLI] profile a benchmark into runtime profiles
-python -m sana.profiling --benchmark lakeqa --out profiles/</pre>
+  <p>
+    LakeQA and KramaBench ship ready-made tasks, profiles, and artifacts. Converting a <em>new</em>
+    benchmark is report-first: sample examples, scaffold a transform skill, then run it.
+  </p>
 </div></section>
 
 <!-- STAGE 2 -->
 <section id="evaluation"><div class="container-wide">
   <h2><span class="stage-num">2</span> sana-evaluation</h2>
   <p>
-    Evaluation runs an agent against the profiles while you choose <strong>which axis to ablate</strong>.
-    Targeted ablations vary one axis and hold the others idealized, so there are no conflicting
-    bottlenecks. Each run picks one mode per axis:
+    Evaluation runs a fixed agent runtime against the profiles while you choose <strong>which axis to
+    ablate</strong>. A diagnostic run flips one axis off <code>ideal</code> and holds the rest idealized,
+    so there are no conflicting bottlenecks. Each axis is a CLI flag:
   </p>
   <div class="table-wrap"><table>
-    <thead><tr><th>Axis</th><th>Mode</th><th>Description</th></tr></thead>
+    <thead><tr><th>Flag</th><th>Modes</th><th>What it controls</th></tr></thead>
     <tbody>
-      <tr><td rowspan="3">Planning</td><td>Naive</td><td>No planning tool; the agent answers directly.</td></tr>
-      <tr><td>Standard</td><td>Planning tool, but a self-written plan with no sanitized sequence.</td></tr>
-      <tr><td>Ideal</td><td>Receives the gold sanitized subquestion sequence.</td></tr>
-      <tr><td rowspan="4">Search</td><td>Naive</td><td>BM25 sparse lexical search over the lake.</td></tr>
-      <tr><td>Standard</td><td>Hybrid search (RRF) with LLM table descriptions (Pneuma / AutoDDG).</td></tr>
-      <tr><td>Ideal</td><td>Always returns the query's target from the gold source sequence.</td></tr>
-      <tr><td>Preloaded</td><td><code>D<sub>gold</sub></code> placed directly in context; no search tool.</td></tr>
-      <tr><td rowspan="2">Data analysis</td><td>Standard</td><td>Writes and runs SQL / Python through ordinary execution tools.</td></tr>
-      <tr><td>Ideal</td><td>Code runs without error, exactly as the agent intended.</td></tr>
+      <tr><td><code>--profile</code></td><td>naive · standard · ideal</td><td>How much runtime-profile guidance (the decomposition) the agent is given.</td></tr>
+      <tr><td><code>--search</code></td><td>naive · standard · ideal · preloaded</td><td>BM25 (naive), hybrid RRF + LLM descriptions (standard), gold sources (ideal), or <code>D<sub>gold</sub></code> placed in context (preloaded).</td></tr>
+      <tr><td><code>--results</code></td><td>naive · ideal</td><td>Live retrieved results vs. profile-backed ideal result payloads.</td></tr>
+      <tr><td><code>--compute</code></td><td>standard · ideal</td><td>Ordinary execution tools vs. the profile's ideal SQL/Python.</td></tr>
+      <tr><td><code>--skills</code></td><td>on · off</td><td>The AgentSkills plugin.</td></tr>
     </tbody>
   </table></div>
+  <p style="font-size:13px;color:var(--muted);">
+    Each axis is chosen per run, alongside the benchmark, model, search-result limit, and task scope —
+    a lightweight smoke sample or the full maintained task set.
+  </p>
 
   <h3>Bring your own tool or variant</h3>
   <p>
-    Every axis is an extension point: register your own planning, search, or data-analysis
-    implementation and pass it as that axis's mode. This is how you measure a new retriever, planner,
-    or executor against the idealized upper bound and the realistic baselines.
+    Every phase is replaceable: swap in your own data lake, retrieval backend, or benchmark artifacts and
+    keep SANA's artifact contracts. Measuring a new retriever or executor is just a run with that axis set
+    to its mode, compared against the idealized upper bound and the realistic baselines.
   </p>
-  <pre class="bibtex"># [FILL IN — exact CLI] ablate one axis, hold the others ideal
-python -m sana.evaluation \
-    --profiles profiles/ \
-    --model gpt-5.4-nano \
-    --plan ideal --search bm25 --data-analysis ideal \
-    --budget 30 --out runs/search_bm25/
-
-# plug in your own implementation on any axis
-python -m sana.evaluation --search my_hybrid_retriever ...</pre>
 </div></section>
 
 <!-- STAGE 3 -->
@@ -174,8 +150,6 @@ python -m sana.evaluation --search my_hybrid_retriever ...</pre>
     when all three are idealized is attributable to the agent's <strong>policy</strong> — evidence
     tracking, source commitment, intermediate validation, and stopping criteria.
   </p>
-  <pre class="bibtex"># [FILL IN — exact CLI] score runs and build the report
-python -m sana.analysis --runs runs/ --out report/</pre>
 </div></section>
 
 <!-- CITE -->
@@ -188,8 +162,8 @@ python -m sana.analysis --runs runs/ --out report/</pre>
   year      = {2026}
 }</pre>
   <p style="font-size:12px;color:var(--muted);margin-top:8px;">
-    Commands marked <code>[FILL IN]</code> are placeholders — replace them with the
-    <a href="https://github.com/Austin-Senna/exploratory-qa-eval">eval repo</a>'s exact CLI before publishing.
+    See the <a href="https://github.com/Austin-Senna/exploratory-qa-eval">eval repo</a> for the maintained
+    CLI, the full flag set, and runnable artifacts.
   </p>
 </div></section>
 
