@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pipeline — SANA</title>
+  <meta name="description" content="The SANA pipeline: profile a benchmark into idealized tools, run an ablation evaluation across planning / search / data-analysis axes, and analyze where the agent fails." />
+  <link rel="icon" href="data:," />
+
+  <!-- SEO — update the base URL below if a custom domain is used -->
+  <link rel="canonical" href="https://sana-ablation.github.io/pipeline/" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#241636" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SANA" />
+  <meta property="og:title" content="Pipeline — SANA" />
+  <meta property="og:description" content="The SANA pipeline: profile a benchmark into idealized tools, run an ablation evaluation across planning / search / data-analysis axes, and analyze where the agent fails." />
+  <meta property="og:url" content="https://sana-ablation.github.io/pipeline/" />
+  <meta property="og:image" content="https://sana-ablation.github.io/assets/sakuras.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Pipeline — SANA" />
+  <meta name="twitter:description" content="The SANA pipeline: profile, evaluate, analyze — an ablation across planning, search, and data-analysis axes." />
+  <meta name="twitter:image" content="https://sana-ablation.github.io/assets/sakuras.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+<header class="site-header site-header--hero">
+  <div class="container-wide">
+    <a class="brand" href="../">SANA</a>
+    <nav class="site-nav">
+      <a href="../">Home</a>
+      <a href="./" class="active">Pipeline</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-title-strip">
+  <div class="container-wide">
+    <h1>Pipeline</h1>
+    <p>From a benchmark to a diagnosis, in three independent stages — profile, evaluate, analyze.</p>
+  </div>
+</div>
+
+<section><div class="container-wide">
+  <p style="max-width:74ch;">
+    An exploratory-QA task is a tuple <code>τ = (Q, D, D<sub>gold</sub>, T, A★, B)</code>: a question
+    <code>Q</code>, a data lake <code>D</code>, the minimal gold sources <code>D<sub>gold</sub></code>
+    sufficient to answer it, a tool set <code>T</code> (dataset <strong>search</strong> <code>f(q,k)</code>
+    and <strong>data analysis</strong> <code>g(c,d)</code>), the gold answer <code>A★</code>, and a
+    tool-call budget <code>B</code> (we use B = 30). SANA runs as three phases you can use independently:
+  </p>
+  <div class="stage-strip">
+    <a class="stage-chip" href="#profiling"><span>1</span> sana-profiling</a>
+    <span class="stage-arrow">→</span>
+    <a class="stage-chip" href="#evaluation"><span>2</span> sana-evaluation</a>
+    <span class="stage-arrow">→</span>
+    <a class="stage-chip" href="#analysis"><span>3</span> sana-analysis</a>
+  </div>
+</div></section>
+
+<!-- STAGE 1 -->
+<section id="profiling"><div class="container-wide">
+  <h2><span class="stage-num">1</span> sana-profiling</h2>
+  <p>
+    Profiling mirrors a benchmark task into a LakeQA-style EQA task and a matching
+    <strong>runtime profile</strong> — the artifact that powers every idealized tool. A profile records:
+  </p>
+  <ul>
+    <li><strong><code>source_sequence</code> / <code>dataset_sequence</code></strong> — the ordered gold sources each step needs.</li>
+    <li><strong><code>reasoning_chain_text</code></strong> — the answer-safe decomposition (sub-questions that don't leak which dataset to fetch).</li>
+    <li><strong><code>ideal_query</code> / <code>ideal_code</code></strong> — per node: the intent, the verified SQL or Python, and the gold intermediate answer.</li>
+  </ul>
+  <figure class="profile-figure">
+    <img src="../assets/task-to-profile-mirror.png" alt="A SANA task mirrored into its runtime profile: source sequence, sanitized subquestions, and per-node execution records with verified answers." />
+    <figcaption>A task (top) mirrored into the SANA profile it produces (bottom).</figcaption>
+  </figure>
+
+  <p>The profile is what each <strong>ideal</strong> mode draws on at evaluation time:</p>
+  <div class="metric-groups">
+    <div class="metric-group"><h4><code>--profile ideal</code></h4><p style="font-size:14px;color:var(--muted)">Exposes the gold reasoning chain as an explicit, answer-safe decomposition.</p></div>
+    <div class="metric-group"><h4><code>--search ideal</code></h4><p style="font-size:14px;color:var(--muted)">Returns exactly the gold sources each query needs from the source sequence — nothing irrelevant.</p></div>
+    <div class="metric-group"><h4><code>--compute ideal</code></h4><p style="font-size:14px;color:var(--muted)">Runs the profile's ideal SQL/Python — no implementation error, exactly as the agent intended.</p></div>
+  </div>
+
+  <p>
+    LakeQA and KramaBench ship ready-made tasks, profiles, and artifacts. Converting a <em>new</em>
+    benchmark is report-first: sample examples, scaffold a transform skill, then run it.
+  </p>
+</div></section>
+
+<!-- STAGE 2 -->
+<section id="evaluation"><div class="container-wide">
+  <h2><span class="stage-num">2</span> sana-evaluation</h2>
+  <p>
+    Evaluation runs a fixed agent runtime against the profiles while you choose <strong>which axis to
+    ablate</strong>. A diagnostic run flips one axis off <code>ideal</code> and holds the rest idealized,
+    so there are no conflicting bottlenecks. Each axis is a CLI flag:
+  </p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Flag</th><th>Modes</th><th>What it controls</th></tr></thead>
+    <tbody>
+      <tr><td><code>--profile</code></td><td>naive · standard · ideal</td><td>How much runtime-profile guidance (the decomposition) the agent is given.</td></tr>
+      <tr><td><code>--search</code></td><td>naive · standard · ideal · preloaded</td><td>BM25 (naive), hybrid RRF + LLM descriptions (standard), gold sources (ideal), or <code>D<sub>gold</sub></code> placed in context (preloaded).</td></tr>
+      <tr><td><code>--results</code></td><td>naive · ideal</td><td>Live retrieved results vs. profile-backed ideal result payloads.</td></tr>
+      <tr><td><code>--compute</code></td><td>standard · ideal</td><td>Ordinary execution tools vs. the profile's ideal SQL/Python.</td></tr>
+      <tr><td><code>--skills</code></td><td>on · off</td><td>The AgentSkills plugin.</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px;color:var(--muted);">
+    Each axis is chosen per run, alongside the benchmark, model, search-result limit, and task scope —
+    a lightweight smoke sample or the full maintained task set.
+  </p>
+
+  <h3>Bring your own tool or variant</h3>
+  <p>
+    Every phase is replaceable: swap in your own data lake, retrieval backend, or benchmark artifacts and
+    keep SANA's artifact contracts. Measuring a new retriever or executor is just a run with that axis set
+    to its mode, compared against the idealized upper bound and the realistic baselines.
+  </p>
+</div></section>
+
+<!-- STAGE 3 -->
+<section id="analysis"><div class="container-wide">
+  <h2><span class="stage-num">3</span> sana-analysis</h2>
+  <p>
+    Analysis scores the runs and reproduces the paper's diagnosis. The primary metric is
+    <strong>semantic match (SM)</strong> — an LLM-as-judge crediting answers equivalent to the gold
+    answer up to formatting, aliases, units, or phrasing — alongside two discovery-recall metrics over
+    the gold sources:
+  </p>
+  <div class="metric-groups">
+    <div class="metric-group"><h4>SM</h4><p style="font-size:14px;color:var(--muted)">Semantic match against the gold answer (↑), the headline metric.</p></div>
+    <div class="metric-group"><h4>D_ret</h4><p style="font-size:14px;color:var(--muted)">Retrieval recall: gold sources surfaced by the search tools (↑).</p></div>
+    <div class="metric-group"><h4>D_acc</h4><p style="font-size:14px;color:var(--muted)">Access recall: gold sources actually opened / queried (↑).</p></div>
+  </div>
+  <p>From the scored runs, analysis produces:</p>
+  <ul>
+    <li><strong>Per-component deltas</strong> — the SM gain from idealizing each axis (charted on the <a href="../">home page</a>).</li>
+    <li><strong>End-to-end comparison</strong> — Naive vs. Standard vs. all-Ideal runs.</li>
+    <li><strong>Failure taxonomy</strong> — where incorrect runs break (source targeting, computation, finalization, …).</li>
+    <li><strong>Plan-trajectory audit</strong> — whether the agent actually follows the plan it wrote.</li>
+  </ul>
+  <p>
+    If idealizing an axis closes a large gap, that component is the bottleneck. The gap that remains
+    when all three are idealized is attributable to the agent's <strong>policy</strong> — evidence
+    tracking, source commitment, intermediate validation, and stopping criteria.
+  </p>
+</div></section>
+
+<!-- CITE -->
+<section><div class="container-wide">
+  <h2>Cite</h2>
+  <pre class="bibtex">@inproceedings{sana2026,
+  title     = {SANA: What Matters for QA Agents over Massive Data Lakes?},
+  author    = {Wijaya, Austin Senna and Liu, Jiaxiang and Wang, Haonan and Wu, Eugene},
+  booktitle = {VLDB 2026 Workshop on Systems for Data-centric Agents with Human-in-the-loop (DASHSys)},
+  year      = {2026}
+}</pre>
+  <p style="font-size:12px;color:var(--muted);margin-top:8px;">
+    See the <a href="https://github.com/Austin-Senna/exploratory-qa-eval">eval repo</a> for the maintained
+    CLI, the full flag set, and runnable artifacts.
+  </p>
+</div></section>
+
+<footer class="site-footer">
+  <div class="container-wide">
+    SANA · VLDB 2026 DASHSys · DAP Lab · <a href="../">Home</a>
+  </div>
+</footer>
+
+<script type="module" src="../assets/js/app.js"></script>
+
+</body>
+</html>
